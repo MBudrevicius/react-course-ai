@@ -1,0 +1,9 @@
+# Build and dependency files
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# EF Core migrations (optional)
+Migrations/
