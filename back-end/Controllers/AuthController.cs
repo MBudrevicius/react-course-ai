@@ -50,7 +50,7 @@ public class AuthController : ControllerBase
             Expires = DateTime.UtcNow.AddHours(1)
         });
 
-        return Ok(new { message = "Registration successful" });
+        return Ok(new { message = "Registration successful", token });
     }
 
     [HttpPost("login")]
