@@ -50,7 +50,31 @@ public class AuthController : ControllerBase
             Expires = DateTime.UtcNow.AddHours(1)
         });
 
-        return Ok(new { message = "User registered successfully" });
+        return Ok(new { message = "Registration successful" });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Username == request.UsernameOrEmail || u.Email == request.UsernameOrEmail);
+
+        if (user == null)
+            return Unauthorized("Invalid username or email.");
+
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            return Unauthorized("Invalid password.");
+
+        var token = GenerateJwtToken(user);
+        Response.Cookies.Append("AuthToken", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddHours(1)
+        });
+
+        return Ok(new { message = "Login successful", token });
     }
 
     private string GenerateJwtToken(User user)
