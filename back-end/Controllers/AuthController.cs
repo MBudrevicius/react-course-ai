@@ -39,7 +39,7 @@ public class AuthController(AppDbContext dbContext, IConfiguration config) : Con
         Response.Cookies.Append("AuthToken", token, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = false,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
@@ -63,7 +63,7 @@ public class AuthController(AppDbContext dbContext, IConfiguration config) : Con
         Response.Cookies.Append("AuthToken", token, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = false,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
