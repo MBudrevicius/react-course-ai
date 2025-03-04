@@ -10,16 +10,10 @@ using DbModels;
 
 [Route("auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(AppDbContext dbContext, IConfiguration config) : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IConfiguration _config;
-
-    public AuthController(AppDbContext dbContext, IConfiguration config)
-    {
-        _dbContext = dbContext;
-        _config = config;
-    }
+    private readonly AppDbContext _dbContext = dbContext;
+    private readonly IConfiguration _config = config;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
