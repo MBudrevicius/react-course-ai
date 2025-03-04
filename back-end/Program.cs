@@ -73,7 +73,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins("http://localhost:5173") // Frontend URL
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
