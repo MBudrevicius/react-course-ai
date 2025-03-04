@@ -1,12 +1,34 @@
 <script setup>
 import { ref } from 'vue';
 import Navbar from '../components/Navbar.vue';
+import { registerUser } from '../api/user';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
 
 const passwordFieldType = ref('password');
 
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 }
+
+const formData = ref({
+    email: '',
+    username: '',
+    password: '',
+})
+
+async function register() {
+    try{
+        const result = await registerUser(formData.value);
+        console.log("Success", result);
+        router.push({ name: 'login' });
+    } catch(error){
+        console.log("Error", error);
+    }
+}
+
 </script>
 
 <template>
@@ -14,25 +36,25 @@ function toggleShow() {
         <div class="main">
             <div class="form">
                 <h1>Susikurkite paskyrą ir pradėkite mokytis React!</h1>
-                <form>
+                <form @submit.prevent="register">
                     <label for="username">Elektroninis paštas</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" v-model="formData.email" required>
                     <label for="username">Prisijungimo vardas</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" v-model="formData.username" required>
                     <div display="grid">
                         <label for="password">Slaptažodis</label>
                     </div>
                     
                     <div style="display: ruby">
                         <span>
-                        <input style="color:black" :type="passwordFieldType" id="password" name="password" required>
+                        <input style="color:black" :type="passwordFieldType" id="password" name="password" v-model="formData.password" required>
                             <!-- <img v-else-if="document.getElementById('password').getAttribute('type') === 'text'" src="/svg/show.svg" class="showPassword" @click="toggleShow"> -->
                             <img v-if="passwordFieldType === 'password'" src="/svg/hide.svg" class="showPassword" @click="toggleShow">
                             <img v-else src="/svg/show.svg" class="showPassword" @click="toggleShow">
                         </span>
                     </div>
                     <div class="rounded-rectangle">
-                        <button type="submit" class="submit">Registruotis</button>
+                        <button type="submit" class="submit" @click="register">Registruotis</button>
                     </div>
                 </form>
                 <p>Jau turite paskyrą?&nbsp;<a href="/login">Prisijunkite</a></p>
