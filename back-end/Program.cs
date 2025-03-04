@@ -38,6 +38,18 @@ builder.Services.AddAuthorization();
 // Add Controllers
 builder.Services.AddControllers();
 
+// Enable CORS (Cross-Origin Resource Sharing)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173") // Frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // Build the Application
 var app = builder.Build();
 
@@ -50,6 +62,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS Middleware
+app.UseCors("AllowFrontend");
 
 // Authentication and Authorization Middleware
 app.UseAuthentication();
