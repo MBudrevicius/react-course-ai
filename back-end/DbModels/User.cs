@@ -5,6 +5,7 @@ namespace DbModels;
 
 public class User
 {
+    [Key]
     public int Id { get; set; }
 
     [Required, StringLength(20, MinimumLength = 3)]
