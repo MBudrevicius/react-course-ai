@@ -1,12 +1,30 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, TrackOpTypes } from 'vue';
 import Navbar from '../components/Navbar.vue';
+import { loginUser } from '../api/user';
+import router from '@/router';
 
 const passwordFieldType = ref('password');
 
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 }
+
+const formData = ref({
+    usernameOrEmail: '',
+    password: ''
+});
+
+async function login(){
+    try{
+        const result = await loginUser(formData.value);
+        console.log("Success", result);
+        router.push({ name: 'home' });
+    } catch(error){
+        console.log("Error", error);
+    }
+}
+
 </script>
 
 <template>
@@ -14,16 +32,16 @@ function toggleShow() {
         <div class="main">
             <div class="form">
                 <h1>Įveskite prisijungimo duomenis</h1>
-                <form>
+                <form @submit.prevent="login">
                     <label for="username">Prisijungimo vardas</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" v-model="formData.usernameOrEmail" required>
                     <div display="grid">
                         <label for="password">Slaptažodis</label>
                     </div>
                     
                     <div style="display: ruby">
                         <span>
-                        <input style="color:black" :type="passwordFieldType" id="password" name="password" required>
+                        <input style="color:black" :type="passwordFieldType" id="password" name="password" v-model="formData.password" required>
                             <!-- <img v-else-if="document.getElementById('password').getAttribute('type') === 'text'" src="/svg/show.svg" class="showPassword" @click="toggleShow"> -->
                             <img v-if="passwordFieldType === 'password'" src="/svg/hide.svg" class="showPassword" @click="toggleShow">
                             <img v-else src="/svg/show.svg" class="showPassword" @click="toggleShow">
@@ -92,6 +110,9 @@ label {
     align-content: center;
     margin-left: auto;
     margin-right: auto;
+}
+.rounded-rectangle,button:hover{
+    cursor: pointer;
 }
 
 button.submit {

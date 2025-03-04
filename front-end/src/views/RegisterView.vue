@@ -2,10 +2,7 @@
 import { ref } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import { registerUser } from '../api/user';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
+import router from '@/router';
 
 const passwordFieldType = ref('password');
 
@@ -23,7 +20,7 @@ async function register() {
     try{
         const result = await registerUser(formData.value);
         console.log("Success", result);
-        router.push({ name: 'login' });
+        router.push({ name: 'home' });
     } catch(error){
         console.log("Error", error);
     }
@@ -117,12 +114,15 @@ label {
     margin-left: auto;
     margin-right: auto;
 }
+.rounded-rectangle,button:hover{
+    cursor: pointer;
+}
+
 
 button.submit {
     font-size: 25px;
     color: white;
 }
-
 a {
     color: #916ad5;
 }
