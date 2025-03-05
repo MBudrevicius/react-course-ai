@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as jwtDecode from 'jwt-decode';
 
 export async function registerUser(data){
     try{
@@ -25,4 +26,15 @@ export async function loginUser(data){
           } else {
             console.log("Error:", error.message);
           }    }
+}
+
+export function getCookie(name) {
+  let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
+export function isUserLoggedIn() {
+  const cookieValue = getCookie('AuthToken');
+  if (!cookieValue) return false;
+  return true;
 }
