@@ -38,9 +38,9 @@ public class AuthController(AppDbContext dbContext, IConfiguration config) : Con
         var token = GenerateJwtToken(newUser);
         Response.Cookies.Append("AuthToken", token, new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = false,
             Secure = false,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.Lax,
             Expires = DateTime.UtcNow.AddHours(1)
         });
 
@@ -62,9 +62,9 @@ public class AuthController(AppDbContext dbContext, IConfiguration config) : Con
         var token = GenerateJwtToken(user);
         Response.Cookies.Append("AuthToken", token, new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = false,
             Secure = false,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.Lax,
             Expires = DateTime.UtcNow.AddHours(1)
         });
 
