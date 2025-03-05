@@ -1,3 +1,22 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { isUserLoggedIn } from '@/api/user';
+
+const loggedIn = ref(false);
+
+onMounted(async () => {
+  try {
+    const result = isUserLoggedIn();
+    loggedIn.value = result;
+    console.log(result);
+    console.log('User is logged in:', loggedIn.value);
+  } catch (error) {
+    console.log('Error checking user login status:', error);
+    loggedIn.value = false;
+  }
+});
+</script>
+
 <template>
     <nav class="navbar">
         <div class="flex flex-wrap items-center justify-between mx-auto p-4">
@@ -20,7 +39,8 @@
                 </li>
                 <div class="rounded-rectangle">
                     <li>
-                        <a href="/login" class="">Prisijunk</a>
+                        <a v-if="loggedIn" href="/home">Atsijungti</a>
+                        <a v-else href="/login">Prisijunk</a> 
                     </li>
                 </div>
             </ul>
