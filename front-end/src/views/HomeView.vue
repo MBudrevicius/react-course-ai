@@ -1,9 +1,12 @@
 <script setup>
 import Navbar from '../components/Navbar.vue'
+import Sidebar from '../components/Sidebar.vue'
+import { onMounted } from 'vue'
 </script>
 
 <template>
-    <Navbar />
+    <Navbar />  
+    <Sidebar /> 
     <div class="hero-rectangle">
         <div class="hero">
             <div class="grid-container">
