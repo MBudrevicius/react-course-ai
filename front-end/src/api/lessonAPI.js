@@ -4,7 +4,6 @@ import { getCookie } from './user';
 export async function getLessonsTitles() {
     try {
         const token = getCookie('AuthToken');
-        console.log("token:",token);
         const response = await axios.get('http://localhost:5255/lessons/titles', {
             headers: {
                 Authorization: `Bearer ${token}`

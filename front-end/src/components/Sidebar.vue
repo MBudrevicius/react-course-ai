@@ -10,11 +10,12 @@ const isCollapsed = ref(false)
 
 onMounted(async () => {
   try {
-    if (isUserLoggedIn()) {
+    const userLoggedIn = await isUserLoggedIn()
+    if (userLoggedIn) {
       loggedIn.value = true
       const data = await getLessonsTitles()
       lessons.value = data || []
-      console.log('Lessons:', lessons)
+      console.log('Lessons:', lessons.value)
     }
   } catch (error) {
     console.log('Error checking user login status:', error);
@@ -30,36 +31,34 @@ const toggleSidebar = () => {
 <template>
   <div v-if="loggedIn" class="sidebar-container">
     <fwb-sidebar class="sidebar" :class="{ collapsed: isCollapsed }">
-      <template>
-        <fwb-sidebar-item class="sidebar-item">
-          <template #icon>
-            <svg
-                class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 16 20"
-            >
-              <path d="M16 14V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 0 0 0-2h-1v-2a2 2 0 0 0 2-2ZM4 2h2v12H4V2Zm8 16H3a1 1 0 0 1 0-2h9v2Z" />
-            </svg>
-          </template>
-          <template #default style="text-decoration: none;">Pamokos</template>
-        </fwb-sidebar-item>
-        <ul v-if="!isCollapsed">
-          <li v-for="(lesson, index) in lessons" :key="lesson.id">
-            <router-link :to="`/lessons/${lesson.id}`" class="lesson-link">
-              {{ index + 1 }}. {{ lesson.title }}
-            </router-link>
-          </li>
-        </ul>
-      </template>
+      <fwb-sidebar-item class="sidebar-item">
+        <template #icon>
+          <svg
+              class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 16 20"
+          >
+            <path d="M16 14V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 0 0 0-2h-1v-2a2 2 0 0 0 2-2ZM4 2h2v12H4V2Zm8 16H3a1 1 0 0 1 0-2h9v2Z" />
+          </svg>
+        </template>
+        <template #default>Pamokos</template>
+      </fwb-sidebar-item>
+      <ul v-if="!isCollapsed">
+        <li v-for="(lesson, index) in lessons" :key="lesson.id">
+          <router-link :to="`/lessons/${lesson.id}`" class="lesson-link">
+            {{ index + 1 }}. {{ lesson.title }}
+          </router-link>
+        </li>
+      </ul>
     </fwb-sidebar>
     <button @click="toggleSidebar" class="toggle-button" :class="{ collapsed: isCollapsed }">
       <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M9 5l7 7-7 7" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>
       <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M15 19l-7-7 7-7" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </button>
   </div>
