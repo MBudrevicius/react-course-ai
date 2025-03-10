@@ -37,6 +37,9 @@ onMounted(async () => {
                 <li>
                 <a href="/#contacts" class="">Apie mus</a>
                 </li>
+                <li>
+                    <a v-if="loggedIn" href="/lessons">Pamokos</a>
+                </li>
                 <div class="rounded-rectangle">
                     <li>
                         <a v-if="loggedIn" href="/home">Atsijungti</a>
