@@ -6,7 +6,6 @@ import { FwbSidebar, FwbSidebarItem, FwbSidebarDropdownItem } from 'flowbite-vue
 
 const loggedIn = ref(false)
 const lessons = ref([])
-const isCollapsed = ref(false)
 
 onMounted(async () => {
   try {
@@ -22,15 +21,11 @@ onMounted(async () => {
     loggedIn.value = false;
   }
 })
-
-const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
-}
 </script>
 
 <template>
   <div v-if="loggedIn" class="sidebar-container">
-    <fwb-sidebar class="sidebar" :class="{ collapsed: isCollapsed }">
+    <fwb-sidebar class="sidebar">
       <fwb-sidebar-item class="sidebar-item">
         <template #icon>
           <svg
@@ -45,7 +40,7 @@ const toggleSidebar = () => {
         </template>
         <template #default>Pamokos</template>
       </fwb-sidebar-item>
-      <ul v-if="!isCollapsed">
+      <ul>
         <li v-for="(lesson, index) in lessons" :key="lesson.id">
           <router-link :to="`/lessons/${lesson.id}`" class="lesson-link">
             {{ index + 1 }}. {{ lesson.title }}
@@ -53,14 +48,7 @@ const toggleSidebar = () => {
         </li>
       </ul>
     </fwb-sidebar>
-    <button @click="toggleSidebar" class="toggle-button" :class="{ collapsed: isCollapsed }">
-      <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
+
   </div>
 </template>
 
@@ -70,9 +58,11 @@ const toggleSidebar = () => {
 }
 
 .sidebar {
+  /* Neveikia spalva. */
   background-color: #2D2D2D;
   font-size: 28px;
-  position: fixed;
+  /* Užkomentuoju, nes overlayina net navbarą */
+  /* position: fixed; */
   width: 250px;
   transition: width 0.4s;
   overflow: hidden;
