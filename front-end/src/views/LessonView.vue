@@ -2,7 +2,7 @@
 import Navbar from '../components/Navbar.vue'
 import SideBar from '../components/Sidebar.vue'
 import Task from '@/components/Task.vue';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getLessonById } from '../api/lessonAPI'
 import UploadFile from '@/components/UploadFile.vue';
@@ -13,17 +13,26 @@ const lessonTitle = ref('')
 const lessonContent = ref('')
 
 onMounted(async () => {
-  try {
-    const lesson = await getLessonById(lessonId.value)
-    lessonTitle.value = lesson.title
-    lessonContent.value = lesson.content
-    console.log('Pamokos pavadinimas:', lessonTitle.value)  
-    console.log('Pamokos turinys:', lessonContent.value)
-  } catch (error) {
-    console.log('Error fetching lesson:', error)
-  }
+  fetchLesson();
 })
+
+watch(() => route.params.id, async (newId) => {
+  lessonId.value = newId;
+  fetchLesson();
+});
+
+async function fetchLesson(){
+  try {
+    const lesson = await getLessonById(lessonId.value);
+    lessonTitle.value = lesson.title;
+    lessonContent.value = lesson.content;
+  } catch (error) {
+    console.log('Error fetching lesson:', error);
+  }
+}
 </script>
+
+
 
 <template>
     <Navbar />
