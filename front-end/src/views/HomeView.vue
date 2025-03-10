@@ -6,7 +6,6 @@ import { onMounted } from 'vue'
 
 <template>
     <Navbar />  
-    <Sidebar /> 
     <div class="hero-rectangle">
         <div class="hero">
             <div class="grid-container">
