@@ -1,6 +1,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
+defineProps({
+  taskContent: String,
+});
+
 const collapsible = ref(null);
 
 onMounted(() => {
@@ -21,13 +25,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="task">
-      <button class="collapsible">Užduotis</button>
-      <!-- Čia turėtų vykti užduoties mappinimas -->
-      <div class="content">
-          <p>Atvaizduoti tekstą "Hello, World!" naudojant React komponentą.</p>
-      </div>
+  <div class="task">
+    <button class="collapsible">Užduotis</button>
+    <div class="content">
+      <p>{{ taskContent }}</p>
     </div>
+  </div>
 </template>
 
 <style scoped>

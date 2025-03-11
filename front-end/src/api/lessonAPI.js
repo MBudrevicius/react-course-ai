@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { getCookie } from './user';
 
-export async function getLessonsTitles() {
+const LESSONS_API_BASE_URL = 'http://localhost:5255/lessons';
+
+async function fetchFromLessonsAPI(endpoint) {
     try {
         const token = getCookie('AuthToken');
-        const response = await axios.get('http://localhost:5255/lessons/titles', {
+        const response = await axios.get(`${LESSONS_API_BASE_URL}/${endpoint}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -12,33 +14,20 @@ export async function getLessonsTitles() {
         });
         return response.data;
     } catch (error) {
-        if (error.response) {
-            console.log("Error status:", error.response.status);
-            console.log("Server response:", error.response.data);
-        } else {
-            console.log("Error:", error.message);
-        }
+        handleAPIError(error);
         throw error;
     }
 }
 
-export async function getLessonById(id) {
-    try {
-        const token = getCookie('AuthToken');
-        const response = await axios.get(`http://localhost:5255/lessons/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            withCredentials: true
-        });
-        return response.data;
-    } catch (error) {
-        if (error.response) {
-            console.log("Error status:", error.response.status);
-            console.log("Server response:", error.response.data);
-        } else {
-            console.log("Error:", error.message);
-        }
-        throw error;
+function handleAPIError(error) {
+    if (error.response) {
+        console.error("Error status:", error.response.status);
+        console.error("Server response:", error.response.data);
+    } else {
+        console.error("Error:", error.message);
     }
 }
+
+export const getLessonsTitles = () => fetchFromLessonsAPI('titles');
+export const getLessonById = (id) => fetchFromLessonsAPI(id);
+export const getTasksByLessonId = (id) => fetchFromLessonsAPI(`${id}/tasks`);
