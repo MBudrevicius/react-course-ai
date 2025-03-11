@@ -4,30 +4,43 @@ import SideBar from '../components/Sidebar.vue'
 import Task from '@/components/Task.vue';
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getLessonById } from '../api/lessonAPI'
+import { getLessonById, getTasksByLessonId } from '../api/lessonAPI'
 import UploadFile from '@/components/UploadFile.vue';
 
 const route = useRoute()
 const lessonId = ref(route.params.id)
 const lessonTitle = ref('')
 const lessonContent = ref('')
+const taskContent = ref('No tasks available')
 
 onMounted(async () => {
   fetchLesson();
+  fetchTasks();
 })
 
 watch(() => route.params.id, async (newId) => {
   lessonId.value = newId;
   fetchLesson();
+  fetchTasks();
 });
 
-async function fetchLesson(){
+async function fetchLesson() {
   try {
     const lesson = await getLessonById(lessonId.value);
     lessonTitle.value = lesson.title;
     lessonContent.value = lesson.content;
   } catch (error) {
     console.log('Error fetching lesson:', error);
+  }
+}
+
+async function fetchTasks() {
+  try {
+    const tasks = await getTasksByLessonId(lessonId.value);
+    taskContent.value = tasks.length > 0 ? tasks[0].question : 'No tasks available';
+  } catch (error) {
+    console.log('Error fetching tasks:', error);
+    taskContent.value = 'Error fetching tasks';
   }
 }
 </script>
@@ -41,7 +54,7 @@ async function fetchLesson(){
         <SideBar />
       </div>
       <div class="content">
-        <Task />
+        <Task :taskContent="taskContent" />
         <h1 v-if="!lessonTitle" class="theory">Labas!</h1>
         <h1 v-else class="theory">{{ lessonTitle }}</h1>
         <p v-if="!lessonTitle" class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>
