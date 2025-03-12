@@ -42,7 +42,7 @@ onMounted(async () => {
                 </li>
                 <div class="rounded-rectangle">
                     <li>
-                        <a v-if="loggedIn" href="/home">Atsijungti</a>
+                        <a v-if="loggedIn" href="/">Atsijungti</a>
                         <a v-else href="/login">Prisijunk</a> 
                     </li>
                 </div>
