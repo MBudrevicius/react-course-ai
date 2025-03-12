@@ -51,7 +51,7 @@ async function register() {
                         </span>
                     </div>
                     <div class="rounded-rectangle">
-                        <button type="submit" class="submit" @click="register">Registruotis</button>
+                        <button type="submit" class="submit">Registruotis</button>
                     </div>
                 </form>
                 <p>Jau turite paskyrą?&nbsp;<a href="/login">Prisijunkite</a></p>
