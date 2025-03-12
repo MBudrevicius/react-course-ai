@@ -15,6 +15,16 @@ onMounted(async () => {
     loggedIn.value = false;
   }
 });
+
+async function logout(){
+    try{
+        document.cookie = 'AuthToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+        loggedIn.value = false;
+        console.log('User logged out');
+    } catch(error){
+        console.log('Error logging out:', error);
+    }
+}
 </script>
 
 <template>
@@ -42,7 +52,7 @@ onMounted(async () => {
                 </li>
                 <div class="rounded-rectangle">
                     <li>
-                        <a v-if="loggedIn" href="/">Atsijungti</a>
+                        <a v-if="loggedIn" @click="logout" href="/">Atsijungti</a>
                         <a v-else href="/login">Prisijunk</a> 
                     </li>
                 </div>
