@@ -1,15 +1,25 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
+import SolutionEvaluation from './SolutionEvaluation.vue';
 
+const showEvaluation = ref(false);
 
+function toggleEvaluation() {
+    showEvaluation.value = true;
+}
+
+function closeEvaluation() {
+    showEvaluation.value = false;
+}
 </script>
 
 <template>
     <label for="files">Įkelk failus čia:</label>
     <div>
         <input type="file" id="files" name="files"/>
-        <button type="submit">Pateikti</button>
+        <button type="submit" @click='toggleEvaluation'>Pateikti</button>
     </div>
+    <SolutionEvaluation v-if="showEvaluation" @close="closeEvaluation" />
 </template>
 
 <style scoped>
