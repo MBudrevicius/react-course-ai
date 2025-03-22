@@ -1,12 +1,30 @@
 import axios from 'axios';
 import { getCookie } from './user';
 
-const LESSONS_API_BASE_URL = 'http://localhost:5255/lessons';
+const LESSONS_API_BASE_URL = 'http://localhost:5255/api/lessons';
 
 async function fetchFromLessonsAPI(endpoint) {
     try {
         const token = getCookie('AuthToken');
         const response = await axios.get(`${LESSONS_API_BASE_URL}/${endpoint}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        handleAPIError(error);
+        throw error;
+    }
+}
+
+const PROBLEMS_API_BASE_URL = 'http://localhost:5255/api/problems';
+
+async function fetchFromProblemsAPI(endpoint) {
+    try {
+        const token = getCookie('AuthToken');
+        const response = await axios.get(`${PROBLEMS_API_BASE_URL}/${endpoint}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -30,4 +48,4 @@ function handleAPIError(error) {
 
 export const getLessonsTitles = () => fetchFromLessonsAPI('titles');
 export const getLessonById = (id) => fetchFromLessonsAPI(id);
-export const getTasksByLessonId = (id) => fetchFromLessonsAPI(`${id}/tasks`);
+export const getTasksByLessonId = (id) => fetchFromProblemsAPI(`${id}`);

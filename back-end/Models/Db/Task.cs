@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DbModels;
+namespace Models.Db;
 
-public class Task
+public class Problem
 {
     [Key]
     public int Id { get; set; }
