@@ -1,4 +1,5 @@
 
+using System.Security.Claims;
 using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +27,19 @@ public class AIController : ControllerBase
     [HttpPost("evaluate")]
     public async Task<IActionResult> EvaluateSolution([FromBody] CodeSubmissionRequest request)
     {
-        var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == request.UserId);
+        string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized("Invalid user token.");
+        }
+
+        var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound("User not found.");
 
         var problem = await _dbContext.Problems.AsNoTracking().FirstOrDefaultAsync(t => t.Id == request.ProblemId);
         if (problem == null) return NotFound("Problem not found.");
 
-        string prompt = $"Tau bus pateikta užduotis ir naudotojo įkeltas sprendimo kodas. Įvertink sprendimą balu tarp 0-100 ir duog grįžtamąjį ryšį.\n\n" +
+        string prompt = $"Tau bus pateikta užduotis ir naudotojo įkeltas sprendimo kodas. Įvertink sprendimą balu tarp 0-100 ir duok grįžtamąjį ryšį.\n\n" +
                         $"Užduotis: \"{problem.Question}\"\n\n" +
                         $"Naudotojo sprendimas: {request.CodeSubmission}\n\n";
 
@@ -46,7 +53,7 @@ public class AIController : ControllerBase
         var (score, feedback) = ParseScoreAndFeedback(response);
 
         var bestAttempt = await _dbContext.Submissions
-            .Where(s => s.UserId == request.UserId && s.ProblemId == request.ProblemId)
+            .Where(s => s.UserId == userId && s.ProblemId == request.ProblemId)
             .FirstOrDefaultAsync();
 
         if (bestAttempt == null || score > bestAttempt.Score)
@@ -62,7 +69,7 @@ public class AIController : ControllerBase
             {
                 var newSubmission = new CodeSubmission
                 {
-                    UserId = request.UserId,
+                    UserId = userId,
                     ProblemId = request.ProblemId,
                     Code = request.CodeSubmission,
                     Score = score,

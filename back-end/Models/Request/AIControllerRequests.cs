@@ -5,9 +5,6 @@ namespace Models.Request;
 public class CodeSubmissionRequest
 {
     [Required]
-    public int UserId { get; set; }
-
-    [Required]
     public int ProblemId { get; set; }
 
     [Required]
