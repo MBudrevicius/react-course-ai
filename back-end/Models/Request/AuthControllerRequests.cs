@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace RequestModels;
+namespace Models.Request;
 
 public class RegisterRequest
 {
@@ -13,3 +13,13 @@ public class RegisterRequest
     [Required, MinLength(6)]
     public required string Password { get; set; }
 }
+
+public class LoginRequest
+{
+    [Required]
+    public required string UsernameOrEmail { get; set; }
+
+    [Required]
+    public required string Password { get; set; }
+}
+

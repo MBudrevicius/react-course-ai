@@ -3,7 +3,7 @@ import * as jwtDecode from 'jwt-decode';
 
 export async function registerUser(data){
     try{
-        const response = await axios.post('http://localhost:5255/auth/register', data, { withCredentials: true });
+        const response = await axios.post('http://localhost:5255/api/auth/register', data, { withCredentials: true });
         return response.data;
     } catch(error){
         if (error.response) {
@@ -17,7 +17,7 @@ export async function registerUser(data){
 
 export async function loginUser(data){
     try{
-        const response = await axios.post('http://localhost:5255/auth/login', data, { withCredentials: true });
+        const response = await axios.post('http://localhost:5255/api/auth/login', data, { withCredentials: true });
         return response.data;
     } catch(error){
         if (error.response) {

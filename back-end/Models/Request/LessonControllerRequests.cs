@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace RequestModels;
+namespace Models.Request;
 
 public class LessonRequest
 {

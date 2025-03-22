@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DbModels;
+namespace Models.Db;
 
 public class Lesson
 {
