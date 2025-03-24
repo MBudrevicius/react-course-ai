@@ -1,4 +1,5 @@
 
+using System.Security.Claims;
 using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,8 +58,17 @@ public class ProblemController : ControllerBase
     [HttpPost("bestSubmission")]
     public async Task<IActionResult> GetBestSubmission([FromBody] BestSubmissionRequest request)
     {
+        string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            return Unauthorized("Invalid user token.");
+        }
+
+        var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return NotFound("User not found.");
+
         var bestSubmission = await _dbContext.Submissions
-            .Where(s => s.UserId == request.UserId && s.ProblemId == request.ProblemId)
+            .Where(s => s.UserId == userId && s.ProblemId == request.ProblemId)
             .FirstOrDefaultAsync();
 
         if (bestSubmission == null)
