@@ -1,10 +1,14 @@
 <script setup>
-import { defineEmits } from 'vue';
+import { defineEmits, defineProps } from 'vue';
 
 const emit = defineEmits(['close']);
 
+const props = defineProps({
+    mode: String
+})
+
 function closeModal() {
-    emit('close'); // Emit the close event
+    emit('close');
 }
 </script>
 
@@ -12,16 +16,29 @@ function closeModal() {
     <div class="modal">
         <div class="modal-content">
             <span class="close-btn" @click="closeModal">&times;</span>
-            <h2>Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
-            <p>Kur galėtumėte patobulėti:</p>
-            <li>Sintaksė: 100 taškų</li>
-            <li>Kodo teisingumas: 100 taškų</li>
-            <li>Užduoties taisyklingumas: 100 taškų</li>
-            <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
-            <div class="progress-container">
-                <div class="progress-bar"></div>
-                <span class="percentage">100%</span>
-            </div>
+
+            <template v-if="props.mode === 'submit'">
+                <h2>Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
+                <p>Kur galėtumėte patobulėti:</p>
+                <li>Sintaksė: 100 taškų</li>
+                <li>Kodo teisingumas: 100 taškų</li>
+                <li>Užduoties taisyklingumas: 100 taškų</li>
+                <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                    <span class="percentage">100%</span>
+                </div>
+            </template>
+            
+            <template v-if="props.mode === 'best-solution'">
+                <h2>Geriausias sprendimas</h2>
+                <p style="font-size: 18px; margin-top: 5px;">Rezultatas:</p>
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                    <span class="percentage">100%</span>
+                </div>
+                <button>Atsisiųsti</button>
+            </template>
         </div>
     </div>
 </template>
@@ -107,4 +124,20 @@ li {
     cursor: pointer;
     color: #916ad5;
 }
+
+button {
+    border-radius: 25px;
+    background-color: #1c1c1c;
+    color: #916ad5;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 15px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 </style>
