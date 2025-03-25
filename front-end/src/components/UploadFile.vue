@@ -2,13 +2,19 @@
 import { ref } from 'vue';
 import SolutionEvaluation from './SolutionEvaluation.vue';
 import { getEvaluation } from '@/api/evaluationAPI';
+import { useRoute } from 'vue-router'
+
 const showScoreModal = ref(false);
 const modalMode = ref('');
 
 const fileContent = ref('');
 const evaluationResult = ref(null);
 
+const route = useRoute();
+const lessonId = ref(route.params.id);
+
 async function toggleScoreModal(mode) {
+    console.log(lessonId.value);
     await sendFile();
     modalMode.value = mode;
     showScoreModal.value = true;
@@ -20,7 +26,7 @@ function closeScoreModal() {
 
 async function sendFile(){
     try{
-        const response = await getEvaluation({ problemId: 1, codeSubmission: fileContent.value });
+        const response = await getEvaluation({ problemId: lessonId.value, codeSubmission: fileContent.value });
         evaluationResult.value = response;
     }
     catch(error){
