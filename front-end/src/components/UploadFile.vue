@@ -2,24 +2,41 @@
 import { ref } from 'vue';
 import SolutionEvaluation from './SolutionEvaluation.vue';
 
-const showEvaluation = ref(false);
+const showScoreModal = ref(false);
+const modalMode = ref('');
 
-function toggleEvaluation() {
-    showEvaluation.value = true;
+const fileContent = ref('');
+
+function toggleScoreModal(mode) {
+    modalMode.value = mode;
+    showScoreModal.value = true;
 }
 
-function closeEvaluation() {
-    showEvaluation.value = false;
+function closeScoreModal() {
+    showScoreModal.value = false;
+}
+
+function readSubmission(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        fileContent.value = reader.result;
+        console.log("Extracted text:", fileContent.value);
+    }
+
+    reader.readAsText(file);
 }
 </script>
 
 <template>
     <label for="files">Įkelk failus čia:</label>
     <div>
-        <input type="file" id="files" name="files"/>
-        <button type="submit" @click='toggleEvaluation'>Pateikti</button>
+        <input type="file" id="files" name="files" @change="readSubmission"/>
+        <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
+        <button @click="toggleScoreModal('best-solution')">Geriausias sprendimas</button>
     </div>
-    <SolutionEvaluation v-if="showEvaluation" @close="closeEvaluation" />
+    <SolutionEvaluation v-if="showScoreModal" :mode="modalMode" @close="closeScoreModal" />
 </template>
 
 <style scoped>
@@ -51,7 +68,8 @@ button {
     cursor: pointer;
     font-size: 20px;
     margin-left: 10px;
-    width: 150px;
     align-self: right;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 </style>
