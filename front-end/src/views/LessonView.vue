@@ -6,6 +6,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getLessonById, getTasksByLessonId } from '../api/lessonAPI'
 import UploadFile from '@/components/UploadFile.vue';
+import ChatSidePanel from '@/components/ChatSidePanel.vue';
 
 const route = useRoute()
 const lessonId = ref(route.params.id)
@@ -62,6 +63,8 @@ async function fetchTasks() {
         <UploadFile v-if="lessonTitle"/>
       </div>
     </div>
+    <ChatSidePanel />
+
 </template>
 
 <style scoped>
