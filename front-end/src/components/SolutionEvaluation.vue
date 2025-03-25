@@ -4,14 +4,15 @@ import { defineEmits, defineProps } from 'vue';
 const emit = defineEmits(['close']);
 
 const props = defineProps({
-    mode: String
+    mode: String,
+    evaluationResult: Object
 })
 
 function closeModal() {
     emit('close');
 }
-</script>
 
+</script>
 <template>
     <div class="modal">
         <div class="modal-content">
@@ -19,14 +20,12 @@ function closeModal() {
 
             <template v-if="props.mode === 'submit'">
                 <h2>Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
-                <p>Kur galėtumėte patobulėti:</p>
-                <li>Sintaksė: 100 taškų</li>
-                <li>Kodo teisingumas: 100 taškų</li>
-                <li>Užduoties taisyklingumas: 100 taškų</li>
+                <p>Atsiliepimas:</p>
+                <li>{{props.evaluationResult.feedback}}</li>
                 <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
                 <div class="progress-container">
                     <div class="progress-bar"></div>
-                    <span class="percentage">100%</span>
+                    <span class="percentage">{{props.evaluationResult.score}}%</span>
                 </div>
             </template>
             
