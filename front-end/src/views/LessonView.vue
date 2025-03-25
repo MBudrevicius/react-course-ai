@@ -46,8 +46,6 @@ async function fetchTasks() {
 }
 </script>
 
-
-
 <template>
     <Navbar />
     <div class="container">
@@ -59,12 +57,11 @@ async function fetchTasks() {
         <h1 v-if="!lessonTitle" class="theory">Labas!</h1>
         <h1 v-else class="theory">{{ lessonTitle }}</h1>
         <p v-if="!lessonTitle" class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>
-        <p v-else class="theory">{{ lessonContent }}</p>
+        <p v-else class="theory" v-html="lessonContent"></p>
         <UploadFile v-if="lessonTitle"/>
       </div>
     </div>
     <ChatSidePanel />
-
 </template>
 
 <style scoped>
@@ -95,7 +92,85 @@ h1.theory {
 p.theory {
     color: white;
     margin-bottom: 20px;
-    font-size: 32px;
+    font-size: 20px;
     text-align: justify;
+}
+.theory ol {
+  margin-left: 20px;
+  padding-left: 20px;
+  list-style-type: decimal;
+}
+
+.theory li {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.theory b {
+  font-weight: bold;
+}
+.theory pre {
+  background-color: #2d2d2d;
+  color: #f8f8f2;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.theory code {
+  font-family: 'Courier New', Courier, monospace;
+  color: #f8f8f2;
+}
+</style>
+
+<style>
+
+p.theory {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 20px;
+    text-align: justify;
+}
+.theory ol {
+  margin-left: 20px;
+  padding-left: 20px;
+  list-style-type: decimal;
+}
+
+.theory li {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.theory b {
+  font-weight: bold;
+}
+.theory pre {
+  background-color: #2d2d2d;
+  color: #f8f8f2;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.theory code {
+  font-family: 'Courier New', Courier, monospace;
+  color: #f8f8f2;
+}
+.theory a {
+  color: #61dafb;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.theory a:hover {
+  text-decoration: underline;
+  color: #21a1f1; 
 }
 </style>
