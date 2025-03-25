@@ -11,8 +11,5 @@ public class ProblemRequest
 public class BestSubmissionRequest
 {
     [Required]
-    public int UserId { get; set; }
-
-    [Required]
     public int ProblemId { get; set; }
 }
