@@ -39,7 +39,7 @@ public class AIController : ControllerBase
         var problem = await _dbContext.Problems.AsNoTracking().FirstOrDefaultAsync(t => t.Id == problemId);
         if (problem == null) return NotFound("Problem not found.");
 
-        string prompt = $"Tau bus pateikta užduotis ir naudotojo įkeltas sprendimo kodas. Įvertink sprendimą balu tarp 0-100 ir duok grįžtamąjį ryšį.\n\n" +
+        string prompt = "Tau bus pateikta užduotis ir naudotojo įkeltas sprendimo kodas. Įvertink sprendimą balu tarp 0-100 ir duok grįžtamąjį ryšį. Pateik atsakymą formatu: \"{score} {newline} {feedback}\"\n\n" +
                         $"Užduotis: \"{problem.Question}\"\n\n" +
                         $"Naudotojo sprendimas: {request.CodeSubmission}\n\n";
 
@@ -86,15 +86,9 @@ public class AIController : ControllerBase
 
     private (int score, string feedback) ParseScoreAndFeedback(string response)
     {
-        int score = 0;
-        string feedback = response;
-
-        var scoreMatch = System.Text.RegularExpressions.Regex.Match(response, @"\b(\d{1,3})\b");
-        if (scoreMatch.Success && int.TryParse(scoreMatch.Value, out int parsedScore))
-        {
-            score = Math.Clamp(parsedScore, 0, 100);
-        }
-
+        var lines = response.Split('\n');
+        int score = int.Parse(lines[0]);
+        string feedback = string.Join("\n", lines, 1, lines.Length - 1);
         return (score, feedback);
     }
     
