@@ -1,19 +1,38 @@
 <script setup>
 import { ref } from 'vue';
 import SolutionEvaluation from './SolutionEvaluation.vue';
+import { getEvaluation } from '@/api/evaluationAPI';
+import { useRoute } from 'vue-router'
 
 const showScoreModal = ref(false);
 const modalMode = ref('');
 
 const fileContent = ref('');
+const evaluationResult = ref(null);
 
-function toggleScoreModal(mode) {
+const route = useRoute();
+const lessonId = ref(route.params.id);
+
+async function toggleScoreModal(mode) {
+    console.log(lessonId.value);
+    await sendFile();
     modalMode.value = mode;
     showScoreModal.value = true;
 }
 
 function closeScoreModal() {
     showScoreModal.value = false;
+}
+
+async function sendFile(){
+    try{
+        const response = await getEvaluation({ problemId: lessonId.value, codeSubmission: fileContent.value });
+        evaluationResult.value = response;
+    }
+    catch(error){
+        console.error(error);
+    }
+
 }
 
 function readSubmission(event) {
@@ -36,7 +55,12 @@ function readSubmission(event) {
         <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
         <button @click="toggleScoreModal('best-solution')">Geriausias sprendimas</button>
     </div>
-    <SolutionEvaluation v-if="showScoreModal" :mode="modalMode" @close="closeScoreModal" />
+    <SolutionEvaluation
+    v-if="showScoreModal"
+    :mode="modalMode"
+    :evaluationResult="evaluationResult"
+    @close="closeScoreModal"
+  />
 </template>
 
 <style scoped>

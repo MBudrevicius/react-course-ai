@@ -45,7 +45,8 @@ async function fetchSubmission() {
 }
 
 const props = defineProps({
-    mode: String
+    mode: String,
+    evaluationResult: Object
 })
 
 function closeModal() {
@@ -58,7 +59,7 @@ function downloadSubmission(code) {
 
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'script.js'; // Name of the file
+    link.download = 'script.js';
 
     document.body.appendChild(link);
     link.click();
@@ -73,14 +74,12 @@ function downloadSubmission(code) {
 
             <template v-if="props.mode === 'submit'">
                 <h2>Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
-                <p>Kur galėtumėte patobulėti:</p>
-                <li>Sintaksė: 100 taškų</li>
-                <li>Kodo teisingumas: 100 taškų</li>
-                <li>Užduoties taisyklingumas: 100 taškų</li>
+                <p>Atsiliepimas:</p>
+                <li>{{props.evaluationResult.feedback}}</li>
                 <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
                 <div class="progress-container">
                     <div class="progress-bar"></div>
-                    <span class="percentage">100%</span>
+                    <span class="percentage">{{props.evaluationResult.score}}%</span>
                 </div>
             </template>
             
