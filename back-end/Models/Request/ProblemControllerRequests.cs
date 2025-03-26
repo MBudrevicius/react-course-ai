@@ -7,9 +7,3 @@ public class ProblemRequest
     [Required]
     public required string Question { get; set; }
 }
-
-public class BestSubmissionRequest
-{
-    [Required]
-    public int ProblemId { get; set; }
-}

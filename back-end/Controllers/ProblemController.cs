@@ -55,17 +55,22 @@ public class ProblemController : ControllerBase
         return CreatedAtAction(nameof(GetProblems), new { lessonId }, newProblem);
     }
 
-    [HttpGet("bestSubmission")]
+    [HttpGet("bestSubmission/{problemId}")]
     public async Task<IActionResult> GetBestSubmission(int problemId)
     {
         string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
         {
+            Console.WriteLine("Invalid user token. " + userIdClaim);
             return Unauthorized("Invalid user token.");
         }
 
         var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return NotFound("User not found.");
+        if (user == null)
+        {
+            Console.WriteLine("User not found. " + userId);
+            return NotFound("User not found.");
+        }
 
         var bestSubmission = await _dbContext.Submissions
             .Where(s => s.UserId == userId && s.ProblemId == problemId)
@@ -73,6 +78,7 @@ public class ProblemController : ControllerBase
 
         if (bestSubmission == null)
         {
+            Console.WriteLine("No submissions found for this user and task. " + userId);
             return NotFound("No submissions found for this user and task.");
         }
 
