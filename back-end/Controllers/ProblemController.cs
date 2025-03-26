@@ -55,8 +55,8 @@ public class ProblemController : ControllerBase
         return CreatedAtAction(nameof(GetProblems), new { lessonId }, newProblem);
     }
 
-    [HttpPost("bestSubmission")]
-    public async Task<IActionResult> GetBestSubmission([FromBody] BestSubmissionRequest request)
+    [HttpGet("bestSubmission")]
+    public async Task<IActionResult> GetBestSubmission(int problemId)
     {
         string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
@@ -68,7 +68,7 @@ public class ProblemController : ControllerBase
         if (user == null) return NotFound("User not found.");
 
         var bestSubmission = await _dbContext.Submissions
-            .Where(s => s.UserId == userId && s.ProblemId == request.ProblemId)
+            .Where(s => s.UserId == userId && s.ProblemId == problemId)
             .FirstOrDefaultAsync();
 
         if (bestSubmission == null)

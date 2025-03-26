@@ -42,7 +42,6 @@ async function login(){
                     <div style="display: ruby">
                         <span>
                         <input style="color:black" :type="passwordFieldType" id="password" name="password" v-model="formData.password" required>
-                            <!-- <img v-else-if="document.getElementById('password').getAttribute('type') === 'text'" src="/svg/show.svg" class="showPassword" @click="toggleShow"> -->
                             <img v-if="passwordFieldType === 'password'" src="/svg/hide.svg" class="showPassword" @click="toggleShow">
                             <img v-else src="/svg/show.svg" class="showPassword" @click="toggleShow">
                         </span>
