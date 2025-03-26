@@ -24,8 +24,8 @@ public class AIController : ControllerBase
         _openAiApiKey = _config["OpenAI:ApiKey"];
     }
 
-    [HttpPost("evaluate")]
-    public async Task<IActionResult> EvaluateSolution([FromBody] CodeSubmissionRequest request)
+    [HttpPost("evaluate/{problemId}")]
+    public async Task<IActionResult> EvaluateSolution(int problemId, [FromBody] CodeSubmissionRequest request)
     {
         string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
@@ -36,7 +36,7 @@ public class AIController : ControllerBase
         var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return NotFound("User not found.");
 
-        var problem = await _dbContext.Problems.AsNoTracking().FirstOrDefaultAsync(t => t.Id == request.ProblemId);
+        var problem = await _dbContext.Problems.AsNoTracking().FirstOrDefaultAsync(t => t.Id == problemId);
         if (problem == null) return NotFound("Problem not found.");
 
         string prompt = $"Tau bus pateikta užduotis ir naudotojo įkeltas sprendimo kodas. Įvertink sprendimą balu tarp 0-100 ir duok grįžtamąjį ryšį.\n\n" +
@@ -53,7 +53,7 @@ public class AIController : ControllerBase
         var (score, feedback) = ParseScoreAndFeedback(response);
 
         var bestAttempt = await _dbContext.Submissions
-            .Where(s => s.UserId == userId && s.ProblemId == request.ProblemId)
+            .Where(s => s.UserId == userId && s.ProblemId == problemId)
             .FirstOrDefaultAsync();
 
         if (bestAttempt == null || score > bestAttempt.Score)
@@ -70,7 +70,7 @@ public class AIController : ControllerBase
                 var newSubmission = new CodeSubmission
                 {
                     UserId = userId,
-                    ProblemId = request.ProblemId,
+                    ProblemId = problemId,
                     Code = request.CodeSubmission,
                     Score = score,
                     Feedback = feedback,

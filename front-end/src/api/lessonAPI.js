@@ -42,14 +42,11 @@ const SUBMISSIONS_API_BASE_URL = 'http://localhost:5255/api/problems/bestSubmiss
 async function fetchFromSubmissionsAPI(endpoint) {
     try {
         const token = getCookie('AuthToken');
-        const response = await axios.get(`${SUBMISSIONS_API_BASE_URL}`, {
+        const response = await axios.get(`${SUBMISSIONS_API_BASE_URL}/${endpoint}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
-            withCredentials: true,
-            params: {
-                problemId: endpoint
-            }
+            withCredentials: true
         });
         return response.data;
     } catch (error) {
