@@ -9,6 +9,7 @@ const showScoreModal = ref(false);
 const modalMode = ref('');
 
 const fileContent = ref('');
+const fileInput = ref(null);
 const evaluationResult = ref(null);
 const hasSubmission = ref(false);
 
@@ -17,6 +18,7 @@ const lessonId = ref(route.params.id);
 
 watch(() => route.params.id, async () => {
     lessonId.value = route.params.id;
+    await clearInput();
     await checkSubmission();
 });
 
@@ -68,12 +70,19 @@ async function checkSubmission() {
         hasSubmission.value = false;
     }
 }
+
+async function clearInput(){
+    fileContent.value = '';
+    if(fileInput.value){
+        fileInput.value.value = null;
+    }
+}
 </script>
 
 <template>
     <label for="files">Įkelk failus čia:</label>
     <div>
-        <input type="file" id="files" name="files" @change="readSubmission"/>
+        <input type="file" id="files" name="files" @change="readSubmission" ref="fileInput"/>
         <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
         <button v-if="hasSubmission" @click="toggleScoreModal('best-solution')">
             Geriausias sprendimas
