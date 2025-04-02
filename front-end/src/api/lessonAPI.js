@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getCookie } from './user';
 
-const LESSONS_API_BASE_URL = 'http://localhost:5255/api/lessons';
+const LESSONS_API_BASE_URL = '/api/lessons';
 
 async function fetchFromLessonsAPI(endpoint) {
     try {
@@ -19,7 +19,7 @@ async function fetchFromLessonsAPI(endpoint) {
     }
 }
 
-const PROBLEMS_API_BASE_URL = 'http://localhost:5255/api/problems';
+const PROBLEMS_API_BASE_URL = '/api/problems';
 
 async function fetchFromProblemsAPI(endpoint) {
     try {
@@ -37,7 +37,7 @@ async function fetchFromProblemsAPI(endpoint) {
     }
 }
 
-const SUBMISSIONS_API_BASE_URL = 'http://react-komponionas.runasp.net/api/problems/bestSubmission';
+const SUBMISSIONS_API_BASE_URL = '/api/problems/bestSubmission';
 
 async function fetchFromSubmissionsAPI(endpoint) {
     try {
