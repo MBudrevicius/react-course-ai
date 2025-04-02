@@ -37,7 +37,7 @@ async function fetchFromProblemsAPI(endpoint) {
     }
 }
 
-const SUBMISSIONS_API_BASE_URL = 'http://localhost:5255/api/problems/bestSubmission';
+const SUBMISSIONS_API_BASE_URL = 'http://react-komponionas.runasp.net/api/problems/bestSubmission';
 
 async function fetchFromSubmissionsAPI(endpoint) {
     try {

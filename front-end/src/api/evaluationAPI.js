@@ -5,7 +5,7 @@ import { getCookie } from './user';
 export async function getEvaluation(id, data) {
     const token = getCookie('AuthToken');
     try {
-        const response = await axios.post(`http://localhost:5255/api/ai/evaluate/${id}`, data, {
+        const response = await axios.post(`http://react-komponionas.runasp.net/api/ai/evaluate/${id}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             },

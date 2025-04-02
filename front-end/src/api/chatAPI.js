@@ -4,7 +4,7 @@ import { getCookie } from './user';
 export async function sendMessage(data){
     const token = getCookie('AuthToken');
     try{
-        const response = await axios.post('http://localhost:5255/api/ai/chat', data,  {
+        const response = await axios.post('http://react-komponionas.runasp.net/api/ai/chat', data,  {
             headers: {
                 Authorization: `Bearer ${token}`
             },

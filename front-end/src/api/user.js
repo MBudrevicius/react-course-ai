@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export async function registerUser(data){
     try{
-        const response = await axios.post('http://localhost:5255/api/auth/register', data, { withCredentials: true });
+        const response = await axios.post('http://react-komponionas.runasp.net/api/auth/register', data, { withCredentials: true });
         return response.data;
     } catch(error){
         if (error.response) {
@@ -16,7 +16,7 @@ export async function registerUser(data){
 
 export async function loginUser(data){
     try{
-        const response = await axios.post('http://localhost:5255/api/auth/login', data, { withCredentials: true });
+        const response = await axios.post('http://react-komponionas.runasp.net/api/auth/login', data, { withCredentials: true });
         return response.data;
     } catch(error){
         if (error.response) {
