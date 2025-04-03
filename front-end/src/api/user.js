@@ -10,7 +10,10 @@ export async function registerUser(data){
             console.log("Server response:", error.response.data);
           } else {
             console.log("Error:", error.message);
-          }    }
+          }
+        throw error.response.data;  
+        
+      }
 }
 
 
