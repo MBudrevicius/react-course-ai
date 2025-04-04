@@ -69,9 +69,9 @@ async function fetchTasks() {
 
 <style scoped>
 
-.container, .sidebar, .content, .chat {
+/* .container, .sidebar, .content, .chat {
   border: 1px solid red;
-}
+} */
 
 .grid-container {
   display: grid;
