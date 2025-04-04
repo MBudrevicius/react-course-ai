@@ -66,6 +66,7 @@ async function logout(){
 .navbar {
     background-color: #2D2D2D;
     font-size: 28px;
+    box-shadow: #000000 0px 0px 10px 0px;
 }
   
 .navbar-elements {
