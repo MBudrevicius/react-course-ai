@@ -7,16 +7,18 @@ import { useRoute } from 'vue-router'
 
 const showScoreModal = ref(false);
 const modalMode = ref('');
-
 const fileContent = ref('');
+const fileInput = ref(null);
 const evaluationResult = ref(null);
 const hasSubmission = ref(false);
+const fileError = ref(''); 
 
 const route = useRoute();
 const lessonId = ref(route.params.id);
 
 watch(() => route.params.id, async () => {
     lessonId.value = route.params.id;
+    await clearInput();
     await checkSubmission();
 });
 
@@ -43,18 +45,25 @@ async function sendFile(){
     catch(error){
         console.error(error);
     }
-
 }
 
 function readSubmission(event) {
+    fileError.value = '';
     const file = event.target.files[0];
-    const reader = new FileReader();
 
+    if (file && !file.name.toLowerCase().endsWith('.js')) {
+        fileError.value = 'Only .js files are allowed.';
+        if(fileInput.value){
+            fileInput.value.value = null;
+        }
+        return;
+    }
+
+    const reader = new FileReader();
     reader.onload = () => {
         fileContent.value = reader.result;
         console.log("Extracted text:", fileContent.value);
     }
-
     reader.readAsText(file);
 }
 
@@ -68,12 +77,27 @@ async function checkSubmission() {
         hasSubmission.value = false;
     }
 }
+
+async function clearInput(){
+    fileContent.value = '';
+    if(fileInput.value){
+        fileInput.value.value = null;
+    }
+}
 </script>
 
 <template>
     <label for="files">Įkelk failus čia:</label>
     <div>
-        <input type="file" id="files" name="files" @change="readSubmission"/>
+        <input 
+            type="file" 
+            id="files" 
+            name="files" 
+            accept=".js"
+            @change="readSubmission" 
+            ref="fileInput" 
+        />
+        <p v-if="fileError" style="color: red;">{{ fileError }}</p>
         <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
         <button v-if="hasSubmission" @click="toggleScoreModal('best-solution')">
             Geriausias sprendimas

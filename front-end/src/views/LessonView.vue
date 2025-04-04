@@ -48,7 +48,8 @@ async function fetchTasks() {
 
 <template>
     <Navbar />
-    <div class="container">
+    <div class="grid-container">
+
       <div class="sidebar">
         <SideBar />
       </div>
@@ -60,16 +61,25 @@ async function fetchTasks() {
         <p v-else class="theory" v-html="lessonContent"></p>
         <UploadFile v-if="lessonTitle"/>
       </div>
+      <div class="chat">
+        <ChatSidePanel />
+      </div>
     </div>
-    <ChatSidePanel />
 </template>
 
 <style scoped>
-.container {
+
+/* .container, .sidebar, .content, .chat {
+  border: 1px solid red;
+} */
+
+.grid-container {
   display: grid;
   grid-template-areas:
-    "sidebar content";
-  grid-template-columns: 1fr 3fr;
+    "sidebar content chat";
+  grid-template-columns: 1fr 4fr 1fr;
+  gap: 40px;
+  height: 100vh; /* Ensure the grid takes up the full height of the screen */
 }
 
 .sidebar {
@@ -80,6 +90,13 @@ async function fetchTasks() {
   grid-area: content;
   display: flex;
   flex-direction: column;
+}
+
+.chat {
+  grid-area: chat;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 h1.theory {
@@ -172,5 +189,15 @@ p.theory {
 .theory a:hover {
   text-decoration: underline;
   color: #21a1f1; 
+}
+.theory table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.theory th,
+.theory td {
+  border: 1px solid #ddd;
+  padding: 8px;
 }
 </style>

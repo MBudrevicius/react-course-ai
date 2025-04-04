@@ -5,7 +5,8 @@ import { registerUser } from '../api/user';
 import router from '@/router';
 
 const passwordFieldType = ref('password');
-
+const errorMessageStatus = ref(false);
+const errorMessage = ref('');
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 }
@@ -19,10 +20,17 @@ const formData = ref({
 async function register() {
     try{
         const result = await registerUser(formData.value);
-        console.log("Success", result);
-        router.push({ name: 'home' });
+        if(result.status == 200){
+            router.push({ name: 'home' });
+            console.log("Success", result.respose.data);
+        }
     } catch(error){
         console.log("Error", error);
+        errorMessageStatus.value = true;
+        errorMessage.value = error;
+        if(typeof error ==='object'){
+            errorMessage.value = "Slaptažodis turi būti bent 6 simbolių ilgio."
+        }  
     }
 }
 
@@ -33,11 +41,14 @@ async function register() {
         <div class="main">
             <div class="form">
                 <h1>Susikurkite paskyrą ir pradėkite mokytis React!</h1>
+                <div v-if="errorMessageStatus" class="error-message">
+                        <p style="color: red;">{{ errorMessage }}</p>
+                </div>
                 <form @submit.prevent="register">
                     <label for="username">Elektroninis paštas</label>
                     <input type="email" id="email" name="email" v-model="formData.email" required>
                     <label for="username">Prisijungimo vardas</label>
-                    <input type="text" id="username" name="username" v-model="formData.username" required>
+                    <input type="text" id="username" name="username" v-model="formData.username" minlength="3" maxlength="20" required>
                     <div display="grid">
                         <label for="password">Slaptažodis</label>
                     </div>
