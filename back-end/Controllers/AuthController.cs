@@ -28,10 +28,10 @@ public class AuthController : ControllerBase
         string normalizedUsername = request.Username.Trim();
 
         bool emailExists = await _dbContext.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
-        if (emailExists) return BadRequest("Email is already registered.");
+        if (emailExists) return BadRequest("Šis el. paštas jau naudojamas.");
 
         bool usernameExists = await _dbContext.Users.AnyAsync(u => u.Username.ToLower() == normalizedUsername.ToLower());
-        if (usernameExists) return BadRequest("Username is already taken.");
+        if (usernameExists) return BadRequest("Šis vartotojo vardas jau naudojamas.");
 
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 

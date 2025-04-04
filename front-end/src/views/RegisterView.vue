@@ -29,7 +29,7 @@ async function register() {
         errorMessageStatus.value = true;
         errorMessage.value = error;
         if(typeof error ==='object'){
-            errorMessage.value = "Password is too short"
+            errorMessage.value = "Slaptažodis turi būti bent 6 simbolių ilgio."
         }  
     }
 }
@@ -48,7 +48,7 @@ async function register() {
                     <label for="username">Elektroninis paštas</label>
                     <input type="email" id="email" name="email" v-model="formData.email" required>
                     <label for="username">Prisijungimo vardas</label>
-                    <input type="text" id="username" name="username" v-model="formData.username" required>
+                    <input type="text" id="username" name="username" v-model="formData.username" minlength="3" maxlength="20" required>
                     <div display="grid">
                         <label for="password">Slaptažodis</label>
                     </div>
