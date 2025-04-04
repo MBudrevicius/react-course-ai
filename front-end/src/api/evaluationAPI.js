@@ -1,7 +1,6 @@
 import axios from "axios";
 import { getCookie } from './user';
 
-
 export async function getEvaluation(id, data) {
     const token = getCookie('AuthToken');
     try {
