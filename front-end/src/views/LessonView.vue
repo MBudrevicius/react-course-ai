@@ -173,4 +173,14 @@ p.theory {
   text-decoration: underline;
   color: #21a1f1; 
 }
+.theory table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.theory th,
+.theory td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
 </style>

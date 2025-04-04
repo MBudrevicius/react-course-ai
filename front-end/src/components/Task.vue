@@ -28,7 +28,7 @@ onMounted(() => {
   <div class="task">
     <button class="collapsible">Užduotis</button>
     <div class="content">
-      <p>{{ taskContent }}</p>
+      <p v-html="taskContent"></p>
     </div>
   </div>
 </template>
