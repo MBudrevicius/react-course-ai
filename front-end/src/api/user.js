@@ -1,42 +1,41 @@
 import axios from 'axios';
 
-export async function registerUser(data){
-    try{
+export async function registerUser(data) {
+    try {
         const response = await axios.post('http://localhost:5255/api/auth/register', data, { withCredentials: true });
         return response.data;
-    } catch(error){
+    } catch(error) {
         if (error.response) {
             console.log("Error status:", error.response.status);
             console.log("Server response:", error.response.data);
-          } else {
+        } else {
             console.log("Error:", error.message);
-          }
-        throw error.response.data;  
-        
-      }
+        }
+    throw error.response.data;  
+    }
 }
 
-
-export async function loginUser(data){
-    try{
+export async function loginUser(data) {
+    try {
         const response = await axios.post('http://localhost:5255/api/auth/login', data, { withCredentials: true });
         return response.data;
-    } catch(error){
+    } catch(error) {
         if (error.response) {
             console.log("Error status:", error.response.status);
             console.log("Server response:", error.response.data);
-          } else {
+        } else {
             console.log("Error:", error.message);
-          }    }
+        }
+    }
 }
 
 export function getCookie(name) {
-  let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? match[2] : null;
+    let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
 }
 
 export function isUserLoggedIn() {
-  const cookieValue = getCookie('AuthToken');
-  if (!cookieValue) return false;
-  return true;
+    const cookieValue = getCookie('AuthToken');
+    if (!cookieValue) return false;
+    return true;
 }
