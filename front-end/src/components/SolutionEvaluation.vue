@@ -1,7 +1,48 @@
 <script setup>
-import { defineEmits, defineProps } from 'vue';
+import { defineEmits, defineProps, ref, onMounted, watch } from 'vue';
+import { getTasksByLessonId, getBestSubmissionByProblemId } from '../api/lessonAPI';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const emit = defineEmits(['close']);
+const submission = ref('');
+const lessonId = ref(route.params.id);
+const taskContent = ref('No tasks available')
+const taskId = ref('');
+
+onMounted(async () => {
+    await fetchTasks();
+    await fetchSubmission();
+})
+
+// watch(() => route.params.id, async (newId) => {
+//     lessonId.value = newId;
+//     fetchSubmission();
+//     fetchTasks();
+// });
+
+async function fetchTasks() {
+  try {
+    const tasks = await getTasksByLessonId(lessonId.value);
+    taskContent.value = tasks.length > 0 ? tasks[0].question : 'No tasks available';
+    console.log('Tasks:', tasks);
+    taskId.value = tasks[0].id;
+  } catch (error) {
+    console.log('Error fetching tasks:', error);
+    taskContent.value = 'Error fetching tasks';
+  }
+}
+
+async function fetchSubmission() {
+  try {
+    submission.value = await getBestSubmissionByProblemId(taskId.value);
+    console.log(submission);
+    // submissionScore.Score = submissions.Score > 0 ? submissions[0].Score : 'Jūs dar nepateikėte sprendimo šiai užduočiai';
+  } catch (error) {
+    console.log('Error fetching submissions:', error);
+    // submissionScore.value = 'Error fetching submissions';
+  }
+}
 
 const props = defineProps({
     mode: String,
@@ -12,7 +53,20 @@ function closeModal() {
     emit('close');
 }
 
+function downloadSubmission(code) {
+    console.log(code);
+    const blob = new Blob([code], { type: 'application/javascript' });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'script.js';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
+
 <template>
     <div class="modal">
         <div class="modal-content">
@@ -34,9 +88,11 @@ function closeModal() {
                 <p style="font-size: 18px; margin-top: 5px;">Rezultatas:</p>
                 <div class="progress-container">
                     <div class="progress-bar"></div>
-                    <span class="percentage">100%</span>
+                    <span class="percentage">{{submission.score}}%</span>
                 </div>
-                <button>Atsisiųsti</button>
+                <p style="font-size: 18px; margin-top: 5px;">Pastabos:</p>
+                <p style="font-size: 18px; margin-top: 5px; font-style: italic;">{{submission.feedback}}</p>
+                <button @click="downloadSubmission(submission.code)">Atsisiųsti</button>
             </template>
         </div>
     </div>

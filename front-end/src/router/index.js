@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import LessonView from '../views/LessonView.vue' // Importuokite pamokos komponentą
+import LessonView from '../views/LessonView.vue'
+import SolutionEvaluation from '@/components/SolutionEvaluation.vue'
 
 
 const router = createRouter({
@@ -23,17 +24,24 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
     },
+    //Konkrečios pamokos maršrutas
     {
       path: '/lessons/:id',
       name: 'lesson',
       component: LessonView,
       props: true
     },
+    //Maršrutas paspaudus "Pamokos" mygtuką navigacijos juostoje
     {
       path: '/lessons',
       name: 'lessons',
       component: LessonView,
     },
+    {
+      path: '/best-solution',
+      name: 'best-solution',
+      component: SolutionEvaluation,
+    }
   ],
 })
 

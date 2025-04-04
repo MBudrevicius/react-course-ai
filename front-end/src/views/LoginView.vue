@@ -5,6 +5,7 @@ import { loginUser } from '../api/user';
 import router from '@/router';
 
 const passwordFieldType = ref('password');
+const errorMessage = ref(false);
 
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
@@ -18,11 +19,14 @@ const formData = ref({
 async function login(){
     try{
         const result = await loginUser(formData.value);
-        console.log("Success", result);
-        router.push({ name: 'home' });
+        if(result.status == 200){
+            console.log("Success", result);
+            router.push({ name: 'home' });        
+        }
     } catch(error){
         console.log("Error", error);
-    }
+        errorMessage.value = true;
+    } 
 }
 
 </script>
@@ -32,6 +36,9 @@ async function login(){
         <div class="main">
             <div class="form">
                 <h1>Įveskite prisijungimo duomenis</h1>
+                <div v-if="errorMessage" class="error-message">
+                        <p style="color: red;">Neteisingas slaptažodis arba el. pašto adresas.</p>
+                </div>
                 <form @submit.prevent="login">
                     <label for="username">Prisijungimo vardas</label>
                     <input type="text" id="username" name="username" v-model="formData.usernameOrEmail" required>
@@ -42,7 +49,6 @@ async function login(){
                     <div style="display: ruby">
                         <span>
                         <input style="color:black" :type="passwordFieldType" id="password" name="password" v-model="formData.password" required>
-                            <!-- <img v-else-if="document.getElementById('password').getAttribute('type') === 'text'" src="/svg/show.svg" class="showPassword" @click="toggleShow"> -->
                             <img v-if="passwordFieldType === 'password'" src="/svg/hide.svg" class="showPassword" @click="toggleShow">
                             <img v-else src="/svg/show.svg" class="showPassword" @click="toggleShow">
                         </span>
@@ -94,6 +100,7 @@ form
     margin-right: auto;
     text-align: left;
 }
+
 
 label {
     font-size: 20px;

@@ -70,7 +70,7 @@ async function logout(){
   
 .navbar-elements {
     display: flex;
-    float:right;
+    float: right;
 }
   
 a {
