@@ -12,4 +12,6 @@ public class ChatRequest
 {
     [Required]
     public required string Message { get; set; }
+
+    public int? ContextId { get; set; }
 }

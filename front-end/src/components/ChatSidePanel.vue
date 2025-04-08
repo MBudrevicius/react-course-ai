@@ -7,7 +7,8 @@ export default {
     return {
       isCollapsed: true,
       userInput: '',
-      messages: []
+      messages: [],
+      contextId: null
     }
   },
   methods: {
@@ -21,9 +22,15 @@ export default {
       this.userInput = '';
 
       try {
-        const response = await sendMessage({ message: userMessage });
-        const assistantMessage = response;
-        this.messages.push({ role: 'assistant', content: assistantMessage });
+        const response = await sendMessage({
+          message: userMessage,
+          contextId: this.contextId
+        });
+        console.log("aaaa:", response);
+        this.messages.push({ role: 'assistant', content: response.reply });
+        if (response.contextId) {
+          this.contextId = response.contextId;
+        }
       } catch (error) {
         console.error('Error calling backend:', error);
         this.messages.push({
