@@ -3,9 +3,11 @@ import { ref, TrackOpTypes } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import { loginUser } from '../api/user';
 import router from '@/router';
+import SpinningLoader from '@/components/SpinningLoader.vue';
 
 const passwordFieldType = ref('password');
 const errorMessage = ref(false);
+const loading = ref(false);
 
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
@@ -18,21 +20,26 @@ const formData = ref({
 
 async function login(){
     try{
+        loading.value = true;
         const result = await loginUser(formData.value);
-        if(result.message == "Login successful"){
+        console.log(result.message);
+        if(result.message === "Login successful"){
             console.log("Success", result);
-            router.push({ name: 'home' });        
+            router.push({ name: 'home' });
         }
     } catch(error){
         console.log("Error", error);
         errorMessage.value = true;
-    } 
+    } finally {
+        loading.value = false;
+    }
 }
 
 </script>
 
 <template>
     <Navbar />
+    <SpinningLoader v-if="loading" />
         <div class="main">
             <div class="form">
                 <h1>Įveskite prisijungimo duomenis</h1>
@@ -54,7 +61,9 @@ async function login(){
                         </span>
                     </div>
                     <div class="rounded-rectangle">
-                        <button type="submit" class="submit">Prisijungti</button>
+                        <button type="submit" class="submit">
+                            <span v-if="!loading">Prisijungti</span>
+                        </button>
                     </div>
                 </form>
                 <p>Neturite paskyros?&nbsp;<a href="/register">Užsiregistruokite</a></p>
