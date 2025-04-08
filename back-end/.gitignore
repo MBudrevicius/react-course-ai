@@ -9,7 +9,7 @@ obj/
 *.exe
 *.pdb
 
-# EF Core migrations (optional)
+# EF Core migrations
 Migrations/
 
 # Logs
