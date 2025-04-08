@@ -45,12 +45,12 @@ public class AIController : ControllerBase
 
         var response = await GetAiResponseAsync(_config["OpenAI:ModelName"], "You are a React code evaluator.", prompt);
 
-        if (string.IsNullOrWhiteSpace(response))
+        if (string.IsNullOrWhiteSpace(response.Item1))
         {
             return StatusCode(500, "Error processing AI response.");
         }
 
-        var (score, feedback) = ParseScoreAndFeedback(response);
+        var (score, feedback) = ParseScoreAndFeedback(response.Item1);
 
         var bestAttempt = await _dbContext.Submissions
             .Where(s => s.UserId == userId && s.ProblemId == problemId)
@@ -95,27 +95,86 @@ public class AIController : ControllerBase
     [HttpPost("chat")]
     public async Task<IActionResult> ChatWithGPT([FromBody] ChatRequest request)
     {
-        var response = await GetAiResponseAsync("gpt-4o", "You are a React coding assistant, helping a person learning React.", request.Message);
+        var response = await GetAiResponseAsync("gpt-4o", "You are a React coding assistant, helping a person learning React.", request.Message, request.ContextId);
         
-        if (string.IsNullOrWhiteSpace(response))
+        if (string.IsNullOrWhiteSpace(response.Item1))
         {
             return StatusCode(500, "Error: No response from AI.");
         }
 
-        return Ok(new { response });
+        return Ok(new { reply = response.Item1, contextId = response.Item2 });
     }
 
-    private async Task<string?> GetAiResponseAsync(string aiModelName, string systemMessage, string userMessage)
+    private enum ChatMessageType
+    {
+        System = 0,
+        User = 1,
+        Assistant = 2
+    }
+
+    private async Task<(string?, int)> GetAiResponseAsync(string aiModelName, string systemMessage, string userMessage, int? contextId = null)
     {
         var messages = new List<ChatMessage>
         {
-            new SystemChatMessage(systemMessage),
-            new UserChatMessage(userMessage)
+            new SystemChatMessage(systemMessage)
         };
+        var nextIndex = 0;
+
+        if (contextId != null)
+        {
+            var history = await _dbContext.ChatHistory
+                .Where(h => h.ContextId == contextId)
+                .OrderBy(h => h.OrderIndex)
+                .ToListAsync();
+            foreach (var h in history)
+            {
+                switch ((ChatMessageType)h.MessageType)
+                {
+                    case ChatMessageType.System:
+                        messages.Add(new SystemChatMessage(h.Message));
+                        break;
+                    case ChatMessageType.User:
+                        messages.Add(new UserChatMessage(h.Message));
+                        break;
+                    case ChatMessageType.Assistant:
+                        messages.Add(new AssistantChatMessage(h.Message));
+                        break;
+                }
+            }
+            nextIndex = history.Count > 0 ? history.Max(h => h.OrderIndex) + 1 : 0;
+        }
+        else
+        {
+            contextId = await _dbContext.ChatHistory.MaxAsync(t => t.ContextId) + 1;
+        }
+
+        messages.Add(new UserChatMessage(userMessage));
+        _dbContext.ChatHistory.Add(new ChatHistory
+        {
+            ContextId = (int)contextId,
+            OrderIndex = nextIndex,
+            MessageType = (int)ChatMessageType.User,
+            Message = userMessage
+        });
 
         var openAiClient = new ChatClient(aiModelName, _openAiApiKey);
-
         var response = await openAiClient.CompleteChatAsync(messages);
-        return response?.Value?.Content?[0]?.Text;
+        var assistantResponse = response?.Value?.Content?[0]?.Text;
+        if (!string.IsNullOrWhiteSpace(assistantResponse))
+        {
+            messages.Add(new AssistantChatMessage(assistantResponse));
+
+            _dbContext.ChatHistory.Add(new ChatHistory
+            {
+                ContextId = (int)contextId,
+                OrderIndex = nextIndex + 1,
+                MessageType = (int)ChatMessageType.Assistant,
+                Message = assistantResponse
+            });
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        return (assistantResponse, (int)contextId);
     }
 }

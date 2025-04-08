@@ -11,3 +11,6 @@ obj/
 
 # EF Core migrations (optional)
 Migrations/
+
+# Logs
+Logs/

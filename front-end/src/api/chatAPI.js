@@ -11,7 +11,7 @@ export async function sendMessage(data) {
             withCredentials: true
         });
         console.log("response", response);
-        return response.data.response;
+        return response.data;
     } catch(error) {
         if (error.response) {
             console.log("Error status:", error.response.status);
