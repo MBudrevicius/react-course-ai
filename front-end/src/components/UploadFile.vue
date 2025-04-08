@@ -32,6 +32,7 @@ async function toggleEvaluationModal(mode) {
     await sendFile();
     modalMode.value = mode;
     showScoreModal.value = true;
+}
 
 async function toggleScoreModal(mode) {
     try{
@@ -48,10 +49,6 @@ async function toggleScoreModal(mode) {
     
 }
 
-async function toggleScoreModal(mode) {
-    modalMode.value = mode;
-    showScoreModal.value = true;
-}
 
 function closeScoreModal() {
     showScoreModal.value = false;
