@@ -13,6 +13,7 @@ const taskId = ref('');
 onMounted(async () => {
     await fetchTasks();
     await fetchSubmission();
+    await setStyle();
 })
 
 // watch(() => route.params.id, async (newId) => {
@@ -36,12 +37,53 @@ async function fetchTasks() {
 async function fetchSubmission() {
   try {
     submission.value = await getBestSubmissionByProblemId(taskId.value);
-    console.log(submission);
     // submissionScore.Score = submissions.Score > 0 ? submissions[0].Score : 'Jūs dar nepateikėte sprendimo šiai užduočiai';
   } catch (error) {
     console.log('Error fetching submissions:', error);
     // submissionScore.value = 'Error fetching submissions';
   }
+}
+
+async function setStyle() {
+    if (props.mode == 'submit') {
+        document.getElementById("evaluation").style.width = props.evaluationResult.score + "%";
+        
+        if (props.evaluationResult.score >= 40 && props.evaluationResult.score < 80)
+        {
+            document.getElementById("evaluation").style.background = '#c78c06';
+        }
+        else if (props.evaluationResult.score >= 80)
+        {
+            document.getElementById("evaluation").style.background = '#22992c';
+        }
+            
+    } else if (props.mode == 'best-solution') {
+        document.getElementById("best-solution").style.width = submission.value.score + "%";
+
+        if (submission.value.score >= 40 && submission.value.score < 80)
+        {
+            document.getElementById("best-solution").style.background = '#c78c06';
+        }
+        else if (submission.value.score >= 80)
+        {
+            document.getElementById("best-solution").style.background = '#22992c';
+        }
+            
+    }
+
+    const scoreElement = document.getElementById(props.mode === 'submit' ? "evaluation-score" : "best-solution-score");
+
+    let targetScore = props.mode === 'submit' ? props.evaluationResult.score : submission.value.score;
+    let currentScore = 0;
+
+    const interval = setInterval(() => {
+        if (currentScore < targetScore) {
+            currentScore++;
+            if (scoreElement) scoreElement.innerText = `${currentScore}%`;
+        } else {
+            clearInterval(interval);
+        }
+    }, 15);
 }
 
 const props = defineProps({
@@ -65,6 +107,8 @@ function downloadSubmission(code) {
     link.click();
     document.body.removeChild(link);
 }
+
+
 </script>
 
 <template>
@@ -78,8 +122,8 @@ function downloadSubmission(code) {
                 <li>{{props.evaluationResult.feedback}}</li>
                 <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
                 <div class="progress-container">
-                    <div class="progress-bar"></div>
-                    <span class="percentage">{{props.evaluationResult.score}}%</span>
+                    <div class="progress-bar" id="evaluation"></div>
+                    <span class="percentage" id="evaluation-score">0%</span>
                 </div>
             </template>
             
@@ -87,8 +131,8 @@ function downloadSubmission(code) {
                 <h2>Geriausias sprendimas</h2>
                 <p style="font-size: 18px; margin-top: 5px;">Rezultatas:</p>
                 <div class="progress-container">
-                    <div class="progress-bar"></div>
-                    <span class="percentage">{{submission.score}}%</span>
+                    <div class="progress-bar" id="best-solution"></div>
+                    <span class="percentage" id="best-solution-score">0%</span>
                 </div>
                 <p style="font-size: 18px; margin-top: 5px;">Pastabos:</p>
                 <p style="font-size: 18px; margin-top: 5px; font-style: italic;">{{submission.feedback}}</p>
@@ -116,25 +160,14 @@ function downloadSubmission(code) {
 
 .progress-bar {
     align-items: center;
-    background: #916ad5;
-    width: 0%;
+    background: #eb4034;
+    width: 0px;
     height: 20px;
     border-radius: 20px;
-    transition: 0.5s linear;
+    transition: 1s linear;
     transition-property: width, background-color;
-    animation: progress 5s forwards;
+    transition: width 3.5s ease-in-out, background-color 3.5s ease-in-out;
     margin-top: 10px;
-}
-
-@keyframes progress {
-    from {
-        width: 0%;
-        background-color: #eb4034;
-    }
-    to {
-        width: 100%;
-        background-color: #22992c;
-    }
 }
 
 h2 {

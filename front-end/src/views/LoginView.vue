@@ -19,7 +19,7 @@ const formData = ref({
 async function login(){
     try{
         const result = await loginUser(formData.value);
-        if(result.status == 200){
+        if(result.message == "Login successful"){
             console.log("Success", result);
             router.push({ name: 'home' });        
         }
