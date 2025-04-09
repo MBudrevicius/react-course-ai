@@ -27,6 +27,13 @@ onMounted(async () => {
     await checkSubmission();
 });
 
+async function toggleEvaluationModal(mode) {
+    console.log(lessonId.value);
+    await sendFile();
+    modalMode.value = mode;
+    showScoreModal.value = true;
+}
+
 async function toggleScoreModal(mode) {
     try{
         loading.value = true;
@@ -41,6 +48,7 @@ async function toggleScoreModal(mode) {
     }
     
 }
+
 
 function closeScoreModal() {
     showScoreModal.value = false;
@@ -108,7 +116,7 @@ async function clearInput(){
             ref="fileInput" 
         />
         <p v-if="fileError" style="color: red;">{{ fileError }}</p>
-        <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
+        <button type="submit" @click="toggleEvaluationModal('submit')">Pateikti</button>
         <button v-if="hasSubmission" @click="toggleScoreModal('best-solution')">
             Geriausias sprendimas
         </button>
