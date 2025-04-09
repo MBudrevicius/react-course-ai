@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Data;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,18 +79,34 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Use Serilog for logging
+builder.Host.UseSerilog();
+
 // Build the Application
 var app = builder.Build();
 
-// Swagger UI only in Development Environment
 if (app.Environment.IsDevelopment())
 {
+    // Swagger UI setup
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Enable Serilog for logging in Development
+    Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Warning()
+        .WriteTo.File("Logs/api-log.txt")
+        .Enrich.FromLogContext()
+        .CreateLogger();
 }
 
 app.UseHttpsRedirection();
+
+if (app.Environment.IsDevelopment())
+{
+    // Use custom middleware for logging in Development
+    app.UseMiddleware<APILoggingMiddleware>();
+}
 
 // Enable CORS Middleware
 app.UseCors("AllowFrontend");

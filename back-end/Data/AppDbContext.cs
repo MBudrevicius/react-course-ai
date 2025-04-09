@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<Lesson> Lessons { get; set; }
     public DbSet<Problem> Problems { get; set; }
     public DbSet<CodeSubmission> Submissions { get; set; }
+    public DbSet<ChatHistory> ChatHistory { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 }

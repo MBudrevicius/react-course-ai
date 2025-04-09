@@ -4,7 +4,7 @@ import { getTasksByLessonId, getBestSubmissionByProblemId } from '../api/lessonA
 import SolutionEvaluation from './SolutionEvaluation.vue';
 import { getEvaluation } from '@/api/evaluationAPI';
 import { useRoute } from 'vue-router'
-
+import SpinningLoader from './SpinningLoader.vue';
 const showScoreModal = ref(false);
 const modalMode = ref('');
 const fileContent = ref('');
@@ -12,6 +12,7 @@ const fileInput = ref(null);
 const evaluationResult = ref(null);
 const hasSubmission = ref(false);
 const fileError = ref(''); 
+const loading = ref(false);
 
 const route = useRoute();
 const lessonId = ref(route.params.id);
@@ -26,12 +27,28 @@ onMounted(async () => {
     await checkSubmission();
 });
 
-async function toggleScoreModal(mode) {
+async function toggleEvaluationModal(mode) {
     console.log(lessonId.value);
     await sendFile();
     modalMode.value = mode;
     showScoreModal.value = true;
 }
+
+async function toggleScoreModal(mode) {
+    try{
+        loading.value = true;
+        console.log(lessonId.value);
+        await sendFile();
+        modalMode.value = mode;
+        showScoreModal.value = true;
+    } catch(error){
+        console.error('Error in toggleScoreModal:', error);
+    } finally {
+        loading.value = false;
+    }
+    
+}
+
 
 function closeScoreModal() {
     showScoreModal.value = false;
@@ -87,6 +104,7 @@ async function clearInput(){
 </script>
 
 <template>
+    <SpinningLoader v-if="loading" />
     <label for="files">Įkelk failus čia:</label>
     <div>
         <input 
@@ -98,7 +116,7 @@ async function clearInput(){
             ref="fileInput" 
         />
         <p v-if="fileError" style="color: red;">{{ fileError }}</p>
-        <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
+        <button type="submit" @click="toggleEvaluationModal('submit')">Pateikti</button>
         <button v-if="hasSubmission" @click="toggleScoreModal('best-solution')">
             Geriausias sprendimas
         </button>

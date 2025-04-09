@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { getLessonsTitles } from '../api/lessonAPI'
 import { isUserLoggedIn } from '../api/user'
-import { FwbSidebar, FwbSidebarItem, FwbSidebarDropdownItem } from 'flowbite-vue'
 
 const loggedIn = ref(false)
 const lessons = ref([])
@@ -25,21 +24,10 @@ onMounted(async () => {
 
 <template>
   <div v-if="loggedIn" class="sidebar-container">
-    <fwb-sidebar class="sidebar">
-      <fwb-sidebar-item class="sidebar-item" :link="false">
-        <template #icon>
-          <svg
-              class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 16 20"
-          >
-            <path d="M16 14V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 0 0 0-2h-1v-2a2 2 0 0 0 2-2ZM4 2h2v12H4V2Zm8 16H3a1 1 0 0 1 0-2h9v2Z" />
-          </svg>
-        </template>
-        <template #default>Pamokos</template>
-      </fwb-sidebar-item>
+    <div class="sidebar">
+      <div class="sidebar-item">
+        <img src="/svg/book.svg" class="svg" />
+      </div>
       <ul>
         <li v-for="(lesson, index) in lessons" :key="lesson.id">
           <router-link :to="`/lessons/${lesson.id}`" class="lesson-link">
@@ -47,25 +35,43 @@ onMounted(async () => {
           </router-link>
         </li>
       </ul>
-    </fwb-sidebar>
-
+    </div>
   </div>
 </template>
 
 <style scoped>
+.svg {
+  width: 30px;
+  height: 30px;
+  filter: invert(47%) sepia(72%) saturate(0%)  brightness(88%) contrast(89%);
+  margin-left: 5px;
+}
+
+ul {
+  padding: 10px;
+}
+
+li {
+  padding: 3px;
+}
+
+li:hover {
+  background-color: #49494948;
+  border-radius: 10px;
+}
+
 .sidebar-container {
   position: relative;
+  height: 100%;
 }
 
 .sidebar {
-  /* Neveikia spalva. */
   background-color: #2D2D2D;
   font-size: 28px;
-  /* Užkomentuoju, nes overlayina net navbarą */
-  /* position: fixed; */
-  width: 250px;
+  width: 100%;
   transition: width 0.4s;
-  overflow: hidden;
+  height: 100%;
+  box-shadow: 3px 0 10px rgba(0, 0, 0, 0.4) inset;
 }
 
 .sidebar.collapsed {
@@ -111,15 +117,15 @@ a {
 }
 
 .sidebar-item {
+  padding-top: 10px;
   display: flex;
   align-items: center;
+  align-content: center;
+  justify-content: center;
 }
 
 .sidebar-item:hover {
   text-decoration: none;
 }
 
-.lesson-link:hover {
-  color: #916ad5;
-}
 </style>

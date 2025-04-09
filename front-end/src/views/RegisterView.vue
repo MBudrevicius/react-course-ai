@@ -3,10 +3,12 @@ import { ref } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import { registerUser } from '../api/user';
 import router from '@/router';
-
+import SpinningLoader from '@/components/SpinningLoader.vue';
 const passwordFieldType = ref('password');
 const errorMessageStatus = ref(false);
 const errorMessage = ref('');
+const loading = ref(false);
+
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 }
@@ -19,8 +21,11 @@ const formData = ref({
 
 async function register() {
     try{
+        loading.value = true;
         const result = await registerUser(formData.value);
-        if(result.status == 200){
+        console.log(result.message);
+        if(result.message === "Registration successful")
+        {
             router.push({ name: 'home' });
             console.log("Success", result.respose.data);
         }
@@ -30,7 +35,9 @@ async function register() {
         errorMessage.value = error;
         if(typeof error ==='object'){
             errorMessage.value = "Slaptažodis turi būti bent 6 simbolių ilgio."
-        }  
+        } 
+    } finally {
+        loading.value = false;
     }
 }
 
@@ -38,6 +45,7 @@ async function register() {
 
 <template>
     <Navbar />
+    <SpinningLoader v-if="loading" />
         <div class="main">
             <div class="form">
                 <h1>Susikurkite paskyrą ir pradėkite mokytis React!</h1>
