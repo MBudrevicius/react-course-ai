@@ -56,7 +56,8 @@ function closeScoreModal() {
 
 async function sendFile(){
     try{
-        const response = await getEvaluation(lessonId.value, { codeSubmission: fileContent.value });
+        const tasks = await getTasksByLessonId(lessonId.value);
+        const response = await getEvaluation(tasks[0].id, { codeSubmission: fileContent.value });
         evaluationResult.value = response;
     }
     catch(error){
