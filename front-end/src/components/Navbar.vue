@@ -3,6 +3,9 @@ import { ref, onMounted } from 'vue';
 import { isUserLoggedIn } from '@/api/user';
 
 const loggedIn = ref(false);
+const isSuccessCheck = ref(false);
+const errorMessage = ref('');
+const showNotification = ref(false);
 
 onMounted(async () => {
   try {
@@ -19,15 +22,27 @@ onMounted(async () => {
 async function logout(){
     try{
         document.cookie = 'AuthToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+        isSuccessCheck.value = true;
+        errorMessage = "Sėkmingai atsijungta";
+        showNotification.value = true;
+        setTimeout(() => {
+                loggedIn.value = false;
+            }, 500);
         loggedIn.value = false;
         console.log('User logged out');
+        
+
     } catch(error){
         console.log('Error logging out:', error);
+        isSuccessCheck.value = false;
+        errorMessage = "Nepavyko atsijungti";
+        showNotification.value = true;
     }
 }
 </script>
 
 <template>
+    <NotificationItem v-if="showNotification" @close="showNotification = false" :errorMessage="errorMessage" :isSuccess="isSuccessCheck"/>
     <nav class="navbar">
         <div class="flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="/">
