@@ -11,7 +11,7 @@ export async function registerUser(data) {
         } else {
             console.log("Error:", error.message);
         }
-    throw error.response.data;  
+    throw error;  
     }
 }
 
