@@ -79,6 +79,7 @@ export default {
             class="chat-input"
             placeholder="Reikia pagalbos?"
           />
+          <button type="submit" class="send-button"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
           <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg" style="width: 30px; height: 30px;"/></button>
         </form>
       </div>

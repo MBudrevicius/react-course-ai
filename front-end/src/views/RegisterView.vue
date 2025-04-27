@@ -175,7 +175,7 @@ p {
 
 .image {
     position: fixed;
-    bottom: -170px;
+    bottom: -180px;
     display: flex;
     justify-content: center;
     align-items: center;

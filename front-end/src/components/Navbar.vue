@@ -60,7 +60,7 @@ async function logout(){
                 <a href="/#about" class="" aria-current="page">Kas tai?</a>
                 </li>
                 <li>
-                <a href="/#contacts" class="">Apie mus</a>
+                <a href="/#react" class="">Apie React</a>
                 </li>
                 <li>
                     <a v-if="loggedIn" href="/lessons">Pamokos</a>
@@ -100,5 +100,6 @@ a {
 .rounded-rectangle {
     border-radius: 20px;
     background: #4E4E4E;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 </style>
