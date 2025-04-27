@@ -49,7 +49,6 @@ async function fetchTasks() {
 <template>
     <Navbar />
     <div class="grid-container">
-
       <div class="sidebar">
         <SideBar />
       </div>
@@ -79,7 +78,7 @@ async function fetchTasks() {
     "sidebar content chat";
   grid-template-columns: 1fr 4fr 1fr;
   gap: 40px;
-  height: 100vh; /* Ensure the grid takes up the full height of the screen */
+  height: 100vh;
 }
 
 .sidebar {
