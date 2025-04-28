@@ -67,11 +67,6 @@ async function fetchTasks() {
 </template>
 
 <style scoped>
-
-.container, .sidebar, .content {
-  border: 1px solid red;
-}
-
 .grid-container {
   display: grid;
   grid-template-areas:

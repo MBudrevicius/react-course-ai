@@ -70,7 +70,7 @@ li:hover {
   font-size: 28px;
   width: 100%;
   transition: width 0.4s;
-  box-shadow: 3px 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 3px 0 10px rgba(0, 0, 0, 0.4) inset;
   height: 100%;
   min-height: calc(100vh - 67px);
 }
