@@ -1,5 +1,6 @@
 <script>
 import { sendMessage } from '../api/chatAPI';
+import { useSpeechRecognition } from '@vueuse/core';
 
 export default {
   name: 'ChatSidePanel',
@@ -38,6 +39,49 @@ export default {
           content: 'Sorry, there was an error. Please try again.'
         });
       }
+    },
+    startListening() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Jūsų naršyklė nepalaiko balso atpažinimo funkcijos.');
+        return;
+      }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'lt';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    recognition.onresult = async (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log('Recognized speech:', transcript);
+
+      this.messages.push({ role: 'user', content: transcript });
+
+      try {
+        const response = await sendMessage({
+          message: transcript,
+          contextId: this.contextId
+        });
+        console.log("aaaa:", response);
+        this.messages.push({ role: 'assistant', content: response.reply });
+        if (response.contextId) {
+          this.contextId = response.contextId;
+        }
+      } catch (error) {
+        console.error('Error calling backend:', error);
+        this.messages.push({
+          role: 'assistant',
+          content: 'Sorry, there was an error. Please try again.'
+        });
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+    };
     }
   }
 }
@@ -73,13 +117,14 @@ export default {
         </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
+          <button type="button" class="send-button" @click="startListening"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
           <input
             v-model="userInput"
             type="text"
             class="chat-input"
             placeholder="Reikia pagalbos?"
           />
-          <button type="submit" class="send-button"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
+          
           <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg" style="width: 30px; height: 30px;"/></button>
         </form>
       </div>
@@ -90,7 +135,7 @@ export default {
 
 <style scoped>
 .chat-header h2 {
-  font-size: 20px;
+  font-size: 140%;
   color: white;
   margin-left: 10px;
 }
@@ -120,9 +165,8 @@ export default {
 }
 
 .chat-container {
-  position: sticky;
+  position: relative;
   bottom: 0;
-  height: 100%;
 }
 
 .chat-toggle-button {
@@ -158,16 +202,15 @@ export default {
   top: 67px;
   right: 0;
   width: 320px; */
-  /* height: calc(100vh - 60px); */
   /* background-color: #fff;
   border-left: 1px solid #ccc;
   box-shadow: -2px 0 6px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column; */
-  /* z-index: 9998; */
   position: fixed;
+  right: 0;
   bottom: 0;
-  min-width: 300px;
+  max-height: 70%;
 }
 
 .chat-header {
