@@ -210,7 +210,7 @@ export default {
   position: fixed;
   right: 0;
   bottom: 0;
-  max-height: 70%;
+  width: 20vw;
 }
 
 .chat-header {
@@ -243,10 +243,11 @@ export default {
 
 .message {
   margin-bottom: 8px;
+  word-wrap: break-word;
 }
 
 .message.user {
-  text-align: right;
+  text-align: left;
   color: black;
   background-color: white;
   padding: 8px;
