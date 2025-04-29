@@ -138,7 +138,6 @@ public class AIController : ControllerBase
     {
         Stream fileStream = audio.OpenReadStream();
 
-        var openAi = new AudioClient("whisper-1", _openAiApiKey);
         var audioOptions = new AudioTranscriptionOptions()
         {
             Language = "lt",
