@@ -74,7 +74,7 @@ async function fetchTasks() {
       <p v-else class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>   
     </div>
     <div class="chat">
-      <ChatSidePanel />
+      <ChatSidePanel :lessonId="lessonId" :lessonTitle="lessonTitle" />
     </div>
   </div>  
   <Tutorial :isVisible="showTutorial" @close="closeTutorial" />
