@@ -223,7 +223,6 @@ export default {
   position: fixed;
   right: 40px;
   bottom: 0;
-  width: 20vw;
   right: 0;
   width: 320px;
   padding-right: 10px;
