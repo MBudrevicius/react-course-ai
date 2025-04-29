@@ -10,7 +10,9 @@ export default {
       isCollapsed: true,
       userInput: '',
       messages: [],
-      contextId: null
+      contextId: null,
+      isClicked: false,
+      mediaRecorder: null
     }
   },
   methods: {
@@ -28,7 +30,6 @@ export default {
           message: userMessage,
           contextId: this.contextId
         });
-        console.log("aaaa:", response);
         this.messages.push({ role: 'assistant', content: response.reply });
         if (response.contextId) {
           this.contextId = response.contextId;
@@ -41,74 +42,43 @@ export default {
         });
       }
     },
-    startListening() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Jūsų naršyklė nepalaiko balso atpažinimo funkcijos.');
-        return;
-      }
-
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'lt';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.start();
-
-      recognition.onresult = async (event) => {
-        const transcript = event.results[0][0].transcript;
-        console.log('Recognized speech:', transcript);
-
-        this.messages.push({ role: 'user', content: transcript });
-
-        try {
-          const response = await sendMessage({
-            message: transcript,
-            contextId: this.contextId
-          });
-          console.log("aaaa:", response);
-          this.messages.push({ role: 'assistant', content: response.reply });
-          if (response.contextId) {
-            this.contextId = response.contextId;
-          }
-        } catch (error) {
-          console.error('Error calling backend:', error);
-          this.messages.push({
-            role: 'assistant',
-            content: 'Sorry, there was an error. Please try again.'
-          });
-        }
-      };
-
-      recognition.onerror = (event) => {
-      console.error('Speech recognition error', event.error);
-      };
-    },
-    
     async startRecording() {
+      this.isClicked = true;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder = new MediaRecorder(stream);
       const audioChunks = [];
-      mediaRecorder.ondataavailable = (event) => {
+      this.mediaRecorder.ondataavailable = (event) => {
         audioChunks.push(event.data);
       };
-      mediaRecorder.onstop = async () => {
+      this.mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type : 'audio/webm' });
 
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
 
-        if (this.contextId != null) {
-          formData.append('contextId', this.contextId.toString());
-        }
-
         const response = await sendAudio(formData);
+
+        this.messages.push({ role: 'user', content: response.message });
+
+        const responseAI = await sendMessage({
+          message: response.message,
+          contextId: this.contextId
+        });
+
+        this.messages.push({ role: 'assistant', content: responseAI.reply });
       }
 
-      mediaRecorder.start();
+      this.mediaRecorder.start();
       setTimeout(() => {
-        mediaRecorder.stop();
-      }, 5000); // Stop recording after 3 seconds
+        this.mediaRecorder.stop();
+        this.isClicked = false;
+      }, 10000);
+    },
+    async stopRecording() {
+      if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+        this.mediaRecorder.stop();
+        this.isClicked = false;
+      }
     }
   }
 }
@@ -144,7 +114,12 @@ export default {
         </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
-          <button type="button" class="send-button" @click="startRecording"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
+          <button type="button" class="mic-button" @click="startRecording" v-if="!isClicked" id="mic">
+            <img src="/svg/mic.svg" class="mic-svg"/>
+          </button>
+          <button type="button" class="mic-button" @click="stopRecording" v-if="isClicked" id="mic-mute">
+            <img src="/svg/mic-mute.svg" class="mic-svg"/>
+          </button>
           <input
             v-model="userInput"
             type="text"
@@ -152,7 +127,7 @@ export default {
             placeholder="Reikia pagalbos?"
           />
           
-          <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg" style="width: 30px; height: 30px;"/></button>
+          <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg"/></button>
         </form>
       </div>
     </transition>
@@ -161,6 +136,18 @@ export default {
 
 
 <style scoped>
+.mic-button {
+  margin-left: 8px;
+  cursor: pointer;
+  filter: invert(47%) sepia(72%) saturate(467%) hue-rotate(219deg) brightness(88%) contrast(89%);
+}
+
+.mic-svg {
+  width: 25px; 
+  height: 25px;
+  margin-right: 10px;
+}
+
 .chat-header h2 {
   font-size: 140%;
   color: white;
@@ -235,7 +222,7 @@ export default {
   display: flex;
   flex-direction: column; */
   position: fixed;
-  right: 0;
+  right: 40px;
   bottom: 0;
   width: 20vw;
 }
