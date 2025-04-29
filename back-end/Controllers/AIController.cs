@@ -116,15 +116,13 @@ public class AIController : ControllerBase
         var transcription = await TranscribeAudio(request.Audio);
 
         _logger.Warning("Transcription: {Transcription}", transcription);
-
-        var response = await GetAiResponseAsync("gpt-4o", "You are a React coding assistant, helping a person learning React.", transcription, request.ContextId);
         
-        if (string.IsNullOrWhiteSpace(response.Item1))
+        if (string.IsNullOrWhiteSpace(transcription))
         {
             return StatusCode(500, "Error: No response from AI.");
         }
 
-        return Ok(new { reply = response.Item1, contextId = response.Item2 });
+        return Ok(new { message = transcription });
     }
 
     private enum ChatMessageType
