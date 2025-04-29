@@ -81,28 +81,24 @@ async function fetchTasks() {
 </template>
 
 <style scoped>
-
-/* .container, .sidebar, .content, .chat {
-  border: 1px solid red;
-} */
-
 .grid-container {
   display: grid;
   grid-template-areas:
-    "sidebar content chat";
-  grid-template-columns: 1fr 4fr 1fr;
-  gap: 40px;
-  height: 100vh;
+    "sidebar content";
+  grid-template-columns: 1fr 5fr;
 }
 
 .sidebar {
   grid-area: sidebar;
+  height: 100%;
 }
 
 .content {
   grid-area: content;
   display: flex;
   flex-direction: column;
+  margin-left: 40px;
+  margin-right: 40px;
 }
 
 .chat {

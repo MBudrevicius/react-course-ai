@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Models.Db;
 using Models.Request;
 using OpenAI.Chat;
+using OpenAI.Audio;
+using Serilog;
 
 [Route("api/ai")]
 [ApiController]
@@ -16,12 +18,14 @@ public class AIController : ControllerBase
     private readonly IConfiguration _config;
     private readonly AppDbContext _dbContext;
     private readonly string _openAiApiKey;
+    private readonly Serilog.ILogger _logger;
 
     public AIController(IConfiguration config, AppDbContext dbContext)
     {
         _config = config;
         _dbContext = dbContext;
         _openAiApiKey = _config["OpenAI:ApiKey"];
+        _logger = Log.ForContext<AIController>();
     }
 
     [HttpPost("evaluate/{problemId}")]
@@ -105,11 +109,44 @@ public class AIController : ControllerBase
         return Ok(new { reply = response.Item1, contextId = response.Item2 });
     }
 
+    [HttpPost("transcribe")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> AudioChat([FromForm] TranscribeRequest request)
+    {
+        var transcription = await TranscribeAudio(request.Audio);
+
+        _logger.Warning("Transcription: {Transcription}", transcription);
+        
+        if (string.IsNullOrWhiteSpace(transcription))
+        {
+            return StatusCode(500, "Error: No response from AI.");
+        }
+
+        return Ok(new { message = transcription });
+    }
+
     private enum ChatMessageType
     {
         System = 0,
         User = 1,
         Assistant = 2
+    }
+
+    private async Task<string> TranscribeAudio(IFormFile audio)
+    {
+        Stream fileStream = audio.OpenReadStream();
+
+        var audioOptions = new AudioTranscriptionOptions()
+        {
+            Language = "lt",
+            ResponseFormat = AudioTranscriptionFormat.Text,
+        };
+
+        var audioClient = new AudioClient("whisper-1", _openAiApiKey);
+
+        var response = await audioClient.TranscribeAudioAsync(fileStream, audio.FileName, audioOptions);
+
+        return response.Value.Text;
     }
 
     private async Task<(string?, int)> GetAiResponseAsync(string aiModelName, string systemMessage, string userMessage, int? contextId = null)

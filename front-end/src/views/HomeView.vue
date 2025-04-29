@@ -9,7 +9,7 @@ function get() {
 
 <template>
     <Navbar />  
-    <div class="hero-rectangle">
+    <div class="hero-rectangle" style="overflow: hidden;">
         <div class="hero">
             <div class="grid-container">
                 <div style="align-self: center;">
@@ -24,7 +24,7 @@ function get() {
         </div>
     </div>
     
-    <div style="display:grid;">
+    <div style="display:grid; overflow: hidden;">
         <div class="section-rectangle">
             <h6 class="section" id="about">Kas tai?</h6>
         </div>
@@ -46,13 +46,14 @@ function get() {
         </div>
     </div>
 
-    <div class="footer">
+    <div class="footer" style="overflow: hidden;">
         <div class="text">@PVP projektas</div>
         <div class="penguins">
             <img src="/images/Pijus.png">
             <button @click="get()"><img src="/images/as.png" class="hover-pointer"></button>
             <img src="/images/Jonas.png">
             <img src="/images/Martynas.png">
+            <img src="/images/Matas.png">
         </div>
     </div>
     <audio id="audio" src="/src/omg.mp3"></audio>
