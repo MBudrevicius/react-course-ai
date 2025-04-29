@@ -6,18 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Db;
 using Models.Request;
+using Serilog;
 
 [Route("api/problems")]
 [ApiController]
 [Authorize]
-public class ProblemController : ControllerBase
+public class ProblemController(AppDbContext dbContext) : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
-
-    public ProblemController(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly AppDbContext _dbContext = dbContext;
+    private readonly Serilog.ILogger _logger = Log.ForContext<ProblemController>();
 
     [HttpGet("{lessonId}")]
     public async Task<IActionResult> GetProblems(int lessonId)
@@ -25,7 +22,6 @@ public class ProblemController : ControllerBase
         var problems = await _dbContext.Problems
             .Where(t => t.LessonId == lessonId)
             .ToListAsync();
-
         return Ok(problems);
     }
 
@@ -35,13 +31,13 @@ public class ProblemController : ControllerBase
         var lesson = await _dbContext.Lessons.FindAsync(lessonId);
         if (lesson == null)
         {
+            _logger.Error($"Lesson not found with ID: '{lessonId}'.");
             return NotFound("Lesson not found.");
         }
 
         var lastOrderIndex = await _dbContext.Problems
             .Where(t => t.LessonId == lessonId)
             .MaxAsync(t => (int?)t.OrderIndex) ?? 0;
-
         var newProblem = new Problem
         {
             LessonId = lessonId,
@@ -51,34 +47,24 @@ public class ProblemController : ControllerBase
 
         _dbContext.Problems.Add(newProblem);
         await _dbContext.SaveChangesAsync();
-
         return CreatedAtAction(nameof(GetProblems), new { lessonId }, newProblem);
     }
 
     [HttpGet("bestSubmission/{problemId}")]
     public async Task<IActionResult> GetBestSubmission(int problemId)
     {
-        string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        var GetUserResult = await UserHelper.GetCurrentUserAsync(User, _dbContext, _logger);
+        if (GetUserResult.IsFailed)
         {
-            Console.WriteLine("Invalid user token. " + userIdClaim);
-            return Unauthorized("Invalid user token.");
-        }
-
-        var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null)
-        {
-            Console.WriteLine("User not found. " + userId);
-            return NotFound("User not found.");
+            return Unauthorized(GetUserResult.Errors.First().Message);
         }
 
         var bestSubmission = await _dbContext.Submissions
-            .Where(s => s.UserId == userId && s.ProblemId == problemId)
+            .Where(s => s.UserId == GetUserResult.Value.Id && s.ProblemId == problemId)
             .FirstOrDefaultAsync();
-
         if (bestSubmission == null)
         {
-            Console.WriteLine("No submissions found for this user and task. " + userId);
+            _logger.Error($"No submissions found for user ID: '{GetUserResult.Value.Id}' and problem ID: '{problemId}'.");
             return NotFound("No submissions found for this user and task.");
         }
 
