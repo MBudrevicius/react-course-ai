@@ -28,7 +28,8 @@ export async function sendAudio(data) {
     try {
         const response = await axios.post('http://localhost:5255/api/ai/transcribe', data,  {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
             },
             withCredentials: true
         });

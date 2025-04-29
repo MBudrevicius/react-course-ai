@@ -8,6 +8,7 @@ using Models.Db;
 using Models.Request;
 using OpenAI.Chat;
 using OpenAI.Audio;
+using Serilog;
 
 [Route("api/ai")]
 [ApiController]
@@ -17,12 +18,14 @@ public class AIController : ControllerBase
     private readonly IConfiguration _config;
     private readonly AppDbContext _dbContext;
     private readonly string _openAiApiKey;
+    private readonly Serilog.ILogger _logger;
 
     public AIController(IConfiguration config, AppDbContext dbContext)
     {
         _config = config;
         _dbContext = dbContext;
         _openAiApiKey = _config["OpenAI:ApiKey"];
+        _logger = Log.ForContext<AIController>();
     }
 
     [HttpPost("evaluate/{problemId}")]
@@ -112,6 +115,8 @@ public class AIController : ControllerBase
     {
         var transcription = await TranscribeAudio(request.Audio);
 
+        _logger.Warning("Transcription: {Transcription}", transcription);
+
         var response = await GetAiResponseAsync("gpt-4o", "You are a React coding assistant, helping a person learning React.", transcription, request.ContextId);
         
         if (string.IsNullOrWhiteSpace(response.Item1))
@@ -140,9 +145,9 @@ public class AIController : ControllerBase
             ResponseFormat = AudioTranscriptionFormat.Text,
         };
 
-        var audioClient = new AudioClient("whisper=1", _openAiApiKey);
+        var audioClient = new AudioClient("whisper-1", _openAiApiKey);
 
-        var response = await audioClient.TranscribeAudioAsync(fileStream, "speech", audioOptions);
+        var response = await audioClient.TranscribeAudioAsync(fileStream, audio.FileName, audioOptions);
 
         return response.Value.Text;
     }
