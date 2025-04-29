@@ -63,7 +63,7 @@ async function logout(){
                 <a href="/#react" class="">Apie React</a>
                 </li>
                 <li>
-                    <a v-if="loggedIn" href="/lessons">Pamokos</a>
+                    <a v-if="loggedIn" href="/lessons/1">Pamokos</a>
                 </li>
                 <div class="rounded-rectangle">
                     <li>
@@ -82,6 +82,8 @@ async function logout(){
     background-color: #2D2D2D;
     font-size: 28px;
     box-shadow: #000000 0px 0px 10px 0px;
+    width: 100%;
+    max-height: 65px;
 }
   
 .navbar-elements {

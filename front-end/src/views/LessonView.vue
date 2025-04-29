@@ -5,14 +5,15 @@ import Task from '@/components/Task.vue';
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getLessonById, getTasksByLessonId } from '../api/lessonAPI'
-import UploadFile from '@/components/UploadFile.vue';
 import ChatSidePanel from '@/components/ChatSidePanel.vue';
+import Tutorial from '@/components/Tutorial.vue';
 
 const route = useRoute()
 const lessonId = ref(route.params.id)
 const lessonTitle = ref('')
 const lessonContent = ref('')
 const taskContent = ref('No tasks available')
+const showTutorial = ref(false);
 
 onMounted(async () => {
   fetchLesson();
@@ -24,6 +25,19 @@ watch(() => route.params.id, async (newId) => {
   fetchLesson();
   fetchTasks();
 });
+
+const tutorialCompleted = localStorage.getItem('tutorialCompleted');
+
+if (!tutorialCompleted) {
+    setTimeout(() => {
+      showTutorial.value = true;
+    }, 1000);
+  }
+
+function closeTutorial() {
+  showTutorial.value = false;
+}
+
 
 async function fetchLesson() {
   try {
@@ -47,55 +61,51 @@ async function fetchTasks() {
 </script>
 
 <template>
-    <Navbar />
-    <div class="grid-container">
-      <div class="sidebar">
-        <SideBar />
-      </div>
-      <div class="content">
-        <Task :taskContent="taskContent" />
-        <h1 v-if="!lessonTitle" class="theory">Labas!</h1>
-        <h1 v-else class="theory">{{ lessonTitle }}</h1>
-        <p v-if="!lessonTitle" class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>
-        <p v-else class="theory" v-html="lessonContent"></p>
-        <UploadFile v-if="lessonTitle"/>
-      </div>
-      <div class="chat">
-        <ChatSidePanel />
-      </div>
+  <Navbar />
+  <div class="grid-container">
+    <div class="sidebar">
+      <SideBar />
+    </div>    
+    <div class="content">
+      <Task :taskContent="taskContent" />      
+      <h1 v-if="lessonTitle" class="theory">{{ lessonTitle }}</h1>
+      <h1 v-else class="theory">Labas!</h1>
+      <p v-if="lessonTitle" class="theory" v-html="lessonContent"></p>   
+      <p v-else class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>   
     </div>
+    <div class="chat">
+      <ChatSidePanel />
+    </div>
+  </div>  
+  <Tutorial :isVisible="showTutorial" @close="closeTutorial" />
 </template>
 
 <style scoped>
-
-/* .container, .sidebar, .content, .chat {
-  border: 1px solid red;
-} */
-
 .grid-container {
   display: grid;
   grid-template-areas:
-    "sidebar content chat";
-  grid-template-columns: 1fr 4fr 1fr;
-  gap: 40px;
-  height: 100vh;
+    "sidebar content";
+  grid-template-columns: 1fr 5fr;
 }
 
 .sidebar {
   grid-area: sidebar;
+  height: 100%;
 }
 
 .content {
   grid-area: content;
   display: flex;
   flex-direction: column;
+  margin-left: 40px;
+  margin-right: 40px;
 }
 
 .chat {
   grid-area: chat;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 
 h1.theory {

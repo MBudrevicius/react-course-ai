@@ -66,21 +66,13 @@ li:hover {
 }
 
 .sidebar {
-  background-color: #2D2D2D;
+  background-color: #333333;
   font-size: 28px;
   width: 100%;
   transition: width 0.4s;
-  height: 100%;
   box-shadow: 3px 0 10px rgba(0, 0, 0, 0.4) inset;
-}
-
-.sidebar.collapsed {
-  width: 0;
-}
-
-.sidebar-elements {
-  display: flex;
-  float: right;
+  height: 100%;
+  min-height: calc(100vh - 67px);
 }
 
 a {
@@ -93,29 +85,6 @@ a {
   border-radius: 20px;
   background: #4E4E4E;
 }
-
-.toggle-button {
-  background-color: #916ad5;
-  color: white;
-  padding: 10px;
-  cursor: pointer;
-  position: fixed;
-  top: 100px;
-  left: 250px;
-  width: 30px;
-  height: 30px;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: left 0.4s;
-}
-
-.toggle-button.collapsed {
-  left: 0px; 
-}
-
 .sidebar-item {
   padding-top: 10px;
   display: flex;

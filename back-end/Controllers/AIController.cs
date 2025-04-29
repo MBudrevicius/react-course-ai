@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Models.Db;
 using Models.Request;
 using OpenAI.Chat;
+using OpenAI.Audio;
 using Serilog;
 
 [Route("api/ai")]
@@ -137,6 +138,22 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         return Ok(new { reply = response.Item1, contextId = response.Item2 });
     }
 
+    [HttpPost("transcribe")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> AudioChat([FromForm] TranscribeRequest request)
+    {
+        var transcription = await TranscribeAudio(request.Audio);
+
+        _logger.Warning("Transcription: {Transcription}", transcription);
+        
+        if (string.IsNullOrWhiteSpace(transcription))
+        {
+            return StatusCode(500, "Error: No response from AI.");
+        }
+
+        return Ok(new { message = transcription });
+    }
+
     private enum ChatMessageType
     {
         System = 0,
@@ -144,8 +161,29 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         Assistant = 2
     }
 
-    private async Task<(string?, int)> GetAiResponseAsync(string aiModelName, string[] systemMessages, string prompt, int? contextId = null)
+    private async Task<string> TranscribeAudio(IFormFile audio)
     {
+        Stream fileStream = audio.OpenReadStream();
+
+        var audioOptions = new AudioTranscriptionOptions()
+        {
+            Language = "lt",
+            ResponseFormat = AudioTranscriptionFormat.Text,
+        };
+
+        var audioClient = new AudioClient("whisper-1", _openAiApiKey);
+
+        var response = await audioClient.TranscribeAudioAsync(fileStream, audio.FileName, audioOptions);
+
+        return response.Value.Text;
+    }
+
+    private async Task<(string?, int)> GetAiResponseAsync(string aiModelName, string systemMessage, string userMessage, int? contextId = null)
+    {
+        var messages = new List<ChatMessage>
+        {
+            new SystemChatMessage(systemMessage)
+        };
         var nextIndex = 0;
 
         var messages = systemMessages
