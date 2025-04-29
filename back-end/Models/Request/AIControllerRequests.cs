@@ -20,6 +20,4 @@ public class TranscribeRequest
 {
     [Required]
     public required IFormFile Audio { get; set; }
-
-    public int? ContextId { get; set; }
 }
