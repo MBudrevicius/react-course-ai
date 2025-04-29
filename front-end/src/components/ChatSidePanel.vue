@@ -1,10 +1,19 @@
 <script>
-import { sendMessage } from '../api/chatAPI';
+import { sendMessage, sendAudio } from '../api/chatAPI';
 import { useSpeechRecognition } from '@vueuse/core';
-import { sendAudio } from '../api/chatAPI';
 
 export default {
   name: 'ChatSidePanel',
+  props: {
+    lessonId: {
+      type: [String, Number],
+      default: null
+    },
+    lessonTitle: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       isCollapsed: true,
@@ -26,11 +35,18 @@ export default {
       this.userInput = '';
 
       try {
+        let contextInfo = '';
+        if (this.lessonId && this.lessonTitle) {
+          contextInfo = `[Naudotojas šiuo metu skaito pamoką (atsižvelk į tai): "${this.lessonTitle}" (ID: ${this.lessonId})]`;
+        }
+        
         const response = await sendMessage({
-          message: userMessage,
+          message: contextInfo ? `${contextInfo}\n\n${userMessage}` : userMessage,
           contextId: this.contextId
         });
+        
         this.messages.push({ role: 'assistant', content: response.reply });
+        
         if (response.contextId) {
           this.contextId = response.contextId;
         }
