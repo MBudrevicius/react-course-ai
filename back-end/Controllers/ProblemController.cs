@@ -22,7 +22,6 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
         var problems = await _dbContext.Problems
             .Where(t => t.LessonId == lessonId)
             .ToListAsync();
-
         return Ok(problems);
     }
 
@@ -45,9 +44,9 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
             OrderIndex = lastOrderIndex + 1,
             Question = problem.Question
         };
+
         _dbContext.Problems.Add(newProblem);
         await _dbContext.SaveChangesAsync();
-
         return CreatedAtAction(nameof(GetProblems), new { lessonId }, newProblem);
     }
 

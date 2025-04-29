@@ -21,7 +21,6 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
             .OrderBy(l => l.OrderIndex)
             .Select(l => new { l.Id, l.Title })
             .ToListAsync();
-
         return Ok(lessonTitles);
     }
 
@@ -54,7 +53,6 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
 
         _dbContext.Lessons.Add(newLesson);
         await _dbContext.SaveChangesAsync();
-
         return CreatedAtAction(nameof(GetLesson), new { lessonId = newLesson.Id }, newLesson);
     }
 }

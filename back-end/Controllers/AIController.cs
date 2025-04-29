@@ -53,6 +53,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
             _logger.Error("AI response for code evaluation was empty or null.");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
+        _logger.Information($"AI response for code evaluation: '{response.Item1}'");
 
         var parseResult = ParseScoreAndFeedback(response.Item1);
         if (parseResult.IsFailed)
@@ -92,12 +93,12 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         return Ok(new { parseResult.Value.score, parseResult.Value.feedback });
     }
 
-    private Result<(int score, string feedback)> ParseScoreAndFeedback(string response)
+    private static Result<(int score, string feedback)> ParseScoreAndFeedback(string response)
     {
         var lines = response.Split('\n');
         if(!int.TryParse(lines[0], out int score))
         {
-            return Result.Fail($"AI response first line was not score. (AI response: '{response}').");
+            return Result.Fail($"AI response had wrong format and couldn't get score. (AI response: '{response}').");
         }
 
         string feedback = string.Join("\n", lines, 1, lines.Length - 1);
@@ -107,12 +108,6 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
     [HttpPost("chat")]
     public async Task<IActionResult> ChatWithGPT([FromBody] ChatRequest request)
     {
-        var GetUserResult = await UserHelper.GetCurrentUserAsync(User, _dbContext, _logger);
-        if (GetUserResult.IsFailed)
-        {
-            return Unauthorized(GetUserResult.Errors.First().Message);
-        }
-
         var lessons = await _dbContext.Lessons
             .AsNoTracking()
             .Select(l => l.Title)
@@ -134,6 +129,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
             _logger.Error($"AI didn't respond to user chat message. (Chat message: '{request.Message}')");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
+        _logger.Information($"AI response for chat message: '{response.Item1}'");
 
         return Ok(new { reply = response.Item1, contextId = response.Item2 });
     }
@@ -142,16 +138,23 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> AudioChat([FromForm] TranscribeRequest request)
     {
-        var transcription = await TranscribeAudio(request.Audio);
-
-        _logger.Warning("Transcription: {Transcription}", transcription);
-        
-        if (string.IsNullOrWhiteSpace(transcription))
+        Stream fileStream = request.Audio.OpenReadStream();
+        var audioClient = new AudioClient("whisper-1", _openAiApiKey);
+        var audioOptions = new AudioTranscriptionOptions()
         {
-            return StatusCode(500, "Error: No response from AI.");
-        }
+            Language = "lt",
+            ResponseFormat = AudioTranscriptionFormat.Text,
+        };
 
-        return Ok(new { message = transcription });
+        var response = await audioClient.TranscribeAudioAsync(fileStream, request.Audio.FileName, audioOptions);
+        if (string.IsNullOrWhiteSpace(response.Value.Text))
+        {
+            _logger.Error("AI didn't respond to transcribe request.");
+            return StatusCode(500, "Error while processing OpenAI response. Try again later.");
+        }
+        _logger.Information($"AI response for audio transcription: '{response.Value.Text}'");
+
+        return Ok(new { message = response.Value.Text });
     }
 
     private enum ChatMessageType
@@ -161,31 +164,9 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         Assistant = 2
     }
 
-    private async Task<string> TranscribeAudio(IFormFile audio)
+    private async Task<(string?, int)> GetAiResponseAsync(string aiModelName, string[] systemMessages, string prompt, int? contextId = null)
     {
-        Stream fileStream = audio.OpenReadStream();
-
-        var audioOptions = new AudioTranscriptionOptions()
-        {
-            Language = "lt",
-            ResponseFormat = AudioTranscriptionFormat.Text,
-        };
-
-        var audioClient = new AudioClient("whisper-1", _openAiApiKey);
-
-        var response = await audioClient.TranscribeAudioAsync(fileStream, audio.FileName, audioOptions);
-
-        return response.Value.Text;
-    }
-
-    private async Task<(string?, int)> GetAiResponseAsync(string aiModelName, string systemMessage, string userMessage, int? contextId = null)
-    {
-        var messages = new List<ChatMessage>
-        {
-            new SystemChatMessage(systemMessage)
-        };
         var nextIndex = 0;
-
         var messages = systemMessages
             .Select(message => new SystemChatMessage(message))
             .Cast<ChatMessage>()

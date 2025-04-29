@@ -43,6 +43,7 @@ public class AuthController(IConfiguration config, AppDbContext dbContext) : Con
             Email = normalizedEmail,
             PasswordHash = hashedPassword,
         };
+
         _dbContext.Users.Add(newUser);
         await _dbContext.SaveChangesAsync();
         return LoginUser(newUser, "Registration successful");
