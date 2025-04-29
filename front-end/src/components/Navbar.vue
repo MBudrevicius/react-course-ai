@@ -63,7 +63,7 @@ async function logout(){
                 <a href="/#react" class="">Apie React</a>
                 </li>
                 <li>
-                    <a v-if="loggedIn" href="/lessons">Pamokos</a>
+                    <a v-if="loggedIn" href="/lessons/1">Pamokos</a>
                 </li>
                 <div class="rounded-rectangle">
                     <li>

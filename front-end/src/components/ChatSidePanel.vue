@@ -84,7 +84,6 @@ export default {
 }
 </script>
 
-
 <template>
   <div class="chat-container">
     <button class="chat-toggle-button" @click="togglePanel"  v-if="isCollapsed">
@@ -224,7 +223,9 @@ export default {
   position: fixed;
   right: 40px;
   bottom: 0;
-  width: 20vw;
+  right: 0;
+  width: 320px;
+  padding-right: 10px;
 }
 
 .chat-header {

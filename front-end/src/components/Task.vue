@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import UploadFile from '@/components/UploadFile.vue';
 
 defineProps({
   taskContent: String,
@@ -29,7 +30,8 @@ onMounted(() => {
     <button class="collapsible">Užduotis</button>
     <div class="content">
       <p v-html="taskContent"></p>
-    </div>
+      <UploadFile />
+    </div>    
   </div>
 </template>
 
