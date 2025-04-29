@@ -4,18 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Db;
 using Models.Request;
+using Serilog;
 
 [Route("api/lessons")]
 [ApiController]
 [Authorize]
-public class LessonController : ControllerBase
+public class LessonController(AppDbContext dbContext) : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
-
-    public LessonController(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    private readonly AppDbContext _dbContext = dbContext;
+    private readonly Serilog.ILogger _logger = Log.ForContext<LessonController>();
 
     [HttpGet("titles")]
     public async Task<IActionResult> GetTitles()
@@ -37,6 +34,7 @@ public class LessonController : ControllerBase
 
         if (lesson == null)
         {
+            _logger.Error($"Lesson not found with ID: '{lessonId}'.");
             return NotFound();
         }
 

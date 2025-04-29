@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Models.Request;
 
-public class CodeSubmissionRequest
+public class EvaluateCodeRequest
 {
     [Required]
     public required string CodeSubmission { get; set; }
