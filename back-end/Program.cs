@@ -94,7 +94,7 @@ if (app.Environment.IsDevelopment())
 
     // Enable Serilog for logging in Development
     Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
+        .MinimumLevel.Warning()
         .WriteTo.File("Logs/api-log.txt")
         .Enrich.FromLogContext()
         .CreateLogger();

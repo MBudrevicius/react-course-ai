@@ -200,6 +200,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
             contextId = await _dbContext.ChatHistory.MaxAsync(t => t.ContextId) + 1;
         }
 
+        messages.Add(new UserChatMessage(prompt));
         _dbContext.ChatHistory.Add(new ChatHistory
         {
             ContextId = (int)contextId,
