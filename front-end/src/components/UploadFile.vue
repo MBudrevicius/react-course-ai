@@ -141,10 +141,10 @@ label {
 
 input {
     border-radius: 20px;
-    width: 300px;
+    width: 420px;
     margin-bottom: 20px;
     color: white;
-    background-color: #2D2D2D;
+    background-color: #4E4E4E;
 }
 
 input[type=file]::file-selector-button {
@@ -153,7 +153,7 @@ input[type=file]::file-selector-button {
 
 button {
     border-radius: 25px;
-    background-color: #2D2D2D;
+    background-color:  #4E4E4E;
     color: #916ad5;
     padding: 5px;
     cursor: pointer;
