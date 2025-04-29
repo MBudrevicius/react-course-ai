@@ -1,6 +1,7 @@
 <script>
 import { sendMessage } from '../api/chatAPI';
 import { useSpeechRecognition } from '@vueuse/core';
+import { sendAudio } from '../api/chatAPI';
 
 export default {
   name: 'ChatSidePanel',
@@ -46,42 +47,68 @@ export default {
         return;
       }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'lt';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'lt';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
 
-    recognition.start();
+      recognition.start();
 
-    recognition.onresult = async (event) => {
-      const transcript = event.results[0][0].transcript;
-      console.log('Recognized speech:', transcript);
+      recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log('Recognized speech:', transcript);
 
-      this.messages.push({ role: 'user', content: transcript });
+        this.messages.push({ role: 'user', content: transcript });
 
-      try {
-        const response = await sendMessage({
-          message: transcript,
-          contextId: this.contextId
-        });
-        console.log("aaaa:", response);
-        this.messages.push({ role: 'assistant', content: response.reply });
-        if (response.contextId) {
-          this.contextId = response.contextId;
+        try {
+          const response = await sendMessage({
+            message: transcript,
+            contextId: this.contextId
+          });
+          console.log("aaaa:", response);
+          this.messages.push({ role: 'assistant', content: response.reply });
+          if (response.contextId) {
+            this.contextId = response.contextId;
+          }
+        } catch (error) {
+          console.error('Error calling backend:', error);
+          this.messages.push({
+            role: 'assistant',
+            content: 'Sorry, there was an error. Please try again.'
+          });
         }
-      } catch (error) {
-        console.error('Error calling backend:', error);
-        this.messages.push({
-          role: 'assistant',
-          content: 'Sorry, there was an error. Please try again.'
-        });
-      }
-    };
+      };
 
-    recognition.onerror = (event) => {
+      recognition.onerror = (event) => {
       console.error('Speech recognition error', event.error);
-    };
+      };
+    },
+    
+    async startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type : 'audio/webm' });
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+
+        if (this.contextId != null) {
+          formData.append('contextId', this.contextId.toString());
+        }
+
+        const response = await sendAudio(formData);
+      }
+
+      mediaRecorder.start();
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 5000); // Stop recording after 3 seconds
     }
   }
 }
@@ -117,7 +144,7 @@ export default {
         </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
-          <button type="button" class="send-button" @click="startListening"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
+          <button type="button" class="send-button" @click="startRecording"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
           <input
             v-model="userInput"
             type="text"
