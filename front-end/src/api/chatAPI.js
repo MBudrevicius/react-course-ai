@@ -26,7 +26,7 @@ export async function sendMessage(data) {
 export async function sendAudio(data) {
     const token = getCookie('AuthToken');
     try {
-        const response = await axios.post('http://localhost:5255/api/ai/transcribe', data,  {
+        const response = await axios.post('/api/ai/transcribe', data,  {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data'
