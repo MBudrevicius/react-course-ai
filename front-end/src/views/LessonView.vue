@@ -15,10 +15,6 @@ const lessonContent = ref('')
 const taskContent = ref('No tasks available')
 const showTutorial = ref(false);
 
-onMounted(async () => {
-  fetchLesson();
-  fetchTasks();
-})
 
 watch(() => route.params.id, async (newId) => {
   lessonId.value = newId;
@@ -26,13 +22,17 @@ watch(() => route.params.id, async (newId) => {
   fetchTasks();
 });
 
-const tutorialCompleted = localStorage.getItem('tutorialCompleted');
-
-if (!tutorialCompleted) {
+onMounted(async () => {
+  fetchLesson();
+  fetchTasks();
+  
+  const tutorialCompleted = localStorage.getItem('tutorialCompleted');
+  if (!tutorialCompleted) {
     setTimeout(() => {
       showTutorial.value = true;
     }, 1000);
   }
+})
 
 function closeTutorial() {
   showTutorial.value = false;
@@ -74,7 +74,7 @@ async function fetchTasks() {
       <p v-else class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>   
     </div>
     <div class="chat">
-      <ChatSidePanel />
+      <ChatSidePanel :lessonId="lessonId" :lessonTitle="lessonTitle" />
     </div>
   </div>  
   <Tutorial :isVisible="showTutorial" @close="closeTutorial" />

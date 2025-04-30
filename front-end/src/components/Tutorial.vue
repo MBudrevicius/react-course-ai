@@ -45,17 +45,21 @@ function calculatePosition() {
   if (currentStep.value >= tutorialSteps.length) return;
   
   const step = tutorialSteps[currentStep.value];
-  const element = document.querySelector(step.target);
-  
-  if (!element) return;
-  
-  const rect = element.getBoundingClientRect();
-  targetPosition.value = {
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height
-  };
+  setTimeout(() => {
+    const element = document.querySelector(step.target);
+    
+    if (!element) {
+      console.error(`Element with selector '${step.target}' not found`);
+      return;
+    }
+    
+    const rect = element.getBoundingClientRect();
+    targetPosition.value = {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height
+    };
   
   switch (step.position) {
     case 'top':
@@ -94,7 +98,8 @@ function calculatePosition() {
         left: rect.left - 320
       };
       break;
-  }
+  };
+  }, 0);
 }
 
 function nextStep() {
@@ -148,6 +153,8 @@ onMounted(() => {
              top: `${tooltipPosition.top}px`,
              left: `${tooltipPosition.left}px`
            }">
+        <button @click="skipTutorial" class="close-button">×</button>
+        
         <h3>{{ tutorialSteps[currentStep].title }}</h3>
         <p>{{ tutorialSteps[currentStep].content }}</p>
         
@@ -162,11 +169,8 @@ onMounted(() => {
             {{ currentStep === tutorialSteps.length - 1 ? 'Baigti' : 'Toliau' }}
           </button>
         </div>
+       
       </div>
-      
-      <button @click="skipTutorial" class="skip-button">
-        Praleisti
-      </button>
     </div>
   </template>
 
@@ -257,22 +261,27 @@ onMounted(() => {
   color: #ccc;
 }
 
-.skip-button {
+.close-button {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 8px 15px;
-  background-color: #aa0017;
-  border-radius: 4px;
-  color: #000;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #777;
   cursor: pointer;
-  font-size: 14px;
-  pointer-events: auto;
-  z-index: 10002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  border-radius: 50%;
 }
 
-.skip-button:hover {
-  background-color: rgba(167, 4, 4, 0.822);
+.close-button:hover {
+  color: #916ad5;
 }
 
 .highlight-element {

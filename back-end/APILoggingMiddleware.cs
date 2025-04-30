@@ -28,7 +28,11 @@ public class APILoggingMiddleware
             context.Request.Body.Position = 0;
         }
 
-        _logger.Warning("Received HTTP Request {Method} {Path} | Body: \"{Body}\"",
+        var logMessage = context.Request.Path.StartsWithSegments("/api/ai/transcribe", StringComparison.OrdinalIgnoreCase)
+            ? "Received HTTP Request {Method} {Path}"
+            : "Received HTTP Request {Method} {Path} | Body: \"{Body}\"";
+
+        _logger.Information(logMessage,
             context.Request.Method,
             context.Request.Path,
             requestBody);
