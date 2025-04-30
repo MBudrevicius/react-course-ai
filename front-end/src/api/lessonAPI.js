@@ -46,7 +46,7 @@ async function fetchFromProblemsAPI(endpoint) {
         }
     } catch (error) {
         handleAPIError(error);
-        throw error;
+        console.log("Error fetching data from problems API:", error);
     }
 }
 
