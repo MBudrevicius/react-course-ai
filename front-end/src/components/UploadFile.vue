@@ -5,6 +5,8 @@ import SolutionEvaluation from './SolutionEvaluation.vue';
 import { getEvaluation } from '@/api/evaluationAPI';
 import { useRoute } from 'vue-router'
 import SpinningLoader from './SpinningLoader.vue';
+import NotificationItem from './Notification.vue';
+
 const showScoreModal = ref(false);
 const modalMode = ref('');
 const fileContent = ref('');
@@ -13,7 +15,8 @@ const evaluationResult = ref(null);
 const hasSubmission = ref(false);
 const fileError = ref(''); 
 const loading = ref(false);
-
+const showNotification = ref(false);
+const isSuccessCheck = ref(false);
 const route = useRoute();
 const lessonId = ref(route.params.id);
 
@@ -65,7 +68,9 @@ function readSubmission(event) {
     const file = event.target.files[0];
 
     if (file && !file.name.toLowerCase().endsWith('.js')) {
-        fileError.value = 'Only .js files are allowed.';
+        fileError.value = 'Leidžiami tik .js tipo failai. Bandykite dar kartą.';
+        showNotification.value = true;
+        isSuccessCheck.value = false;
         if(fileInput.value){
             fileInput.value.value = null;
         }
@@ -101,6 +106,7 @@ async function clearInput(){
 
 <template>
     <SpinningLoader v-if="loading" />
+    <NotificationItem v-if="showNotification" @close="showNotification = false" :errorMessage="fileError" :isSuccess="isSuccessCheck"/>
     <label for="files">Įkelk failus čia:</label>
     <div>
         <input 
@@ -111,7 +117,6 @@ async function clearInput(){
             @change="readSubmission" 
             ref="fileInput" 
         />
-        <p v-if="fileError" style="color: red;">{{ fileError }}</p>
         <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
         <button v-if="hasSubmission" @click="toggleScoreModal('best-solution')">
             Geriausias sprendimas
@@ -136,10 +141,10 @@ label {
 
 input {
     border-radius: 20px;
-    width: 300px;
+    width: 420px;
     margin-bottom: 20px;
     color: white;
-    background-color: #2D2D2D;
+    background-color: #4E4E4E;
 }
 
 input[type=file]::file-selector-button {
@@ -148,7 +153,7 @@ input[type=file]::file-selector-button {
 
 button {
     border-radius: 25px;
-    background-color: #2D2D2D;
+    background-color:  #4E4E4E;
     color: #916ad5;
     padding: 5px;
     cursor: pointer;

@@ -7,34 +7,36 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Models.Db;
 using Models.Request;
+using Serilog;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(IConfiguration config, AppDbContext dbContext) : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IConfiguration _config;
+    private readonly AppDbContext _dbContext = dbContext;
+    private readonly IConfiguration _config = config;
+    private readonly Serilog.ILogger _logger = Log.ForContext<AuthController>();
 
-    public AuthController(IConfiguration config, AppDbContext dbContext)
-    {
-        _config = config;
-        _dbContext = dbContext;
-    }
-
-   [HttpPost("register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         string normalizedEmail = request.Email.Trim().ToLower();
-        string normalizedUsername = request.Username.Trim();
-
         bool emailExists = await _dbContext.Users.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
-        if (emailExists) return BadRequest("Šis el. paštas jau naudojamas.");
+        if (emailExists)
+        {
+            _logger.Error($"User tried to register with already existing email: '{normalizedEmail}'.");
+            return BadRequest("Šis el. paštas jau naudojamas.");
+        }
 
+        string normalizedUsername = request.Username.Trim();
         bool usernameExists = await _dbContext.Users.AnyAsync(u => u.Username.ToLower() == normalizedUsername.ToLower());
-        if (usernameExists) return BadRequest("Šis vartotojo vardas jau naudojamas.");
+        if (usernameExists)
+        {
+            _logger.Error($"User tried to register with already existing username: '{normalizedUsername}'.");
+            return BadRequest("Šis vartotojo vardas jau naudojamas.");
+        }
 
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
         var newUser = new User
         {
             Username = normalizedUsername,
@@ -44,7 +46,6 @@ public class AuthController : ControllerBase
 
         _dbContext.Users.Add(newUser);
         await _dbContext.SaveChangesAsync();
-
         return LoginUser(newUser, "Registration successful");
     }
 
@@ -58,10 +59,16 @@ public class AuthController : ControllerBase
             .FirstOrDefaultAsync();
 
         if (user == null)
+        {
+            _logger.Error($"During login User was not found for: '{usernameOrEmail}'.");
             return Unauthorized("Invalid username or email.");
+        }
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            _logger.Error($"During login User provided invalid password for: '{usernameOrEmail}'.");
             return Unauthorized("Invalid password.");
+        }
 
         return LoginUser(user, "Login successful");
     }
