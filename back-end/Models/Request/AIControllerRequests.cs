@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Models.Request;
 
-public class CodeSubmissionRequest
+public class EvaluateCodeRequest
 {
     [Required]
     public required string CodeSubmission { get; set; }
@@ -14,4 +14,10 @@ public class ChatRequest
     public required string Message { get; set; }
 
     public int? ContextId { get; set; }
+}
+
+public class TranscribeRequest
+{
+    [Required]
+    public required IFormFile Audio { get; set; }
 }

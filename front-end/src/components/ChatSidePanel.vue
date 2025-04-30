@@ -1,14 +1,27 @@
 <script>
-import { sendMessage } from '../api/chatAPI';
+import { sendMessage, sendAudio } from '../api/chatAPI';
+import { useSpeechRecognition } from '@vueuse/core';
 
 export default {
   name: 'ChatSidePanel',
+  props: {
+    lessonId: {
+      type: [String, Number],
+      default: null
+    },
+    lessonTitle: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       isCollapsed: true,
       userInput: '',
       messages: [],
-      contextId: null
+      contextId: null,
+      isClicked: false,
+      mediaRecorder: null
     }
   },
   methods: {
@@ -22,12 +35,18 @@ export default {
       this.userInput = '';
 
       try {
+        let contextInfo = '';
+        if (this.lessonId && this.lessonTitle) {
+          contextInfo = `[Naudotojas šiuo metu skaito pamoką (atsižvelk į tai): "${this.lessonTitle}" (ID: ${this.lessonId})]`;
+        }
+        
         const response = await sendMessage({
-          message: userMessage,
+          message: contextInfo ? `${contextInfo}\n\n${userMessage}` : userMessage,
           contextId: this.contextId
         });
-        console.log("aaaa:", response);
+        
         this.messages.push({ role: 'assistant', content: response.reply });
+        
         if (response.contextId) {
           this.contextId = response.contextId;
         }
@@ -37,6 +56,44 @@ export default {
           role: 'assistant',
           content: 'Sorry, there was an error. Please try again.'
         });
+      }
+    },
+    async startRecording() {
+      this.isClicked = true;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+      this.mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+      this.mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type : 'audio/webm' });
+
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+
+        const response = await sendAudio(formData);
+
+        this.messages.push({ role: 'user', content: response.message });
+
+        const responseAI = await sendMessage({
+          message: response.message,
+          contextId: this.contextId
+        });
+
+        this.messages.push({ role: 'assistant', content: responseAI.reply });
+      }
+
+      this.mediaRecorder.start();
+      setTimeout(() => {
+        this.mediaRecorder.stop();
+        this.isClicked = false;
+      }, 10000);
+    },
+    async stopRecording() {
+      if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+        this.mediaRecorder.stop();
+        this.isClicked = false;
       }
     }
   }
@@ -72,14 +129,20 @@ export default {
         </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
+          <button type="button" class="mic-button" @click="startRecording" v-if="!isClicked" id="mic">
+            <img src="/svg/mic.svg" class="mic-svg"/>
+          </button>
+          <button type="button" class="mic-button" @click="stopRecording" v-if="isClicked" id="mic-mute">
+            <img src="/svg/mic-mute.svg" class="mic-svg"/>
+          </button>
           <input
             v-model="userInput"
             type="text"
             class="chat-input"
             placeholder="Reikia pagalbos?"
           />
-          <button type="submit" class="send-button"><img src="/svg/mic.svg" class="svg" style="width: 25px; height: 25px;"/></button>
-          <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg" style="width: 30px; height: 30px;"/></button>
+          
+          <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg"/></button>
         </form>
       </div>
     </transition>
@@ -88,8 +151,20 @@ export default {
 
 
 <style scoped>
+.mic-button {
+  margin-left: 8px;
+  cursor: pointer;
+  filter: invert(47%) sepia(72%) saturate(467%) hue-rotate(219deg) brightness(88%) contrast(89%);
+}
+
+.mic-svg {
+  width: 25px; 
+  height: 25px;
+  margin-right: 10px;
+}
+
 .chat-header h2 {
-  font-size: 20px;
+  font-size: 140%;
   color: white;
   margin-left: 10px;
 }
@@ -119,9 +194,8 @@ export default {
 }
 
 .chat-container {
-  position: sticky;
+  position: relative;
   bottom: 0;
-  height: 100%;
 }
 
 .chat-toggle-button {
@@ -157,14 +231,13 @@ export default {
   top: 67px;
   right: 0;
   width: 320px; */
-  /* height: calc(100vh - 60px); */
   /* background-color: #fff;
   border-left: 1px solid #ccc;
   box-shadow: -2px 0 6px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column; */
-  /* z-index: 9998; */
   position: fixed;
+  right: 40px;
   bottom: 0;
   right: 0;
   width: 320px;
@@ -201,10 +274,11 @@ export default {
 
 .message {
   margin-bottom: 8px;
+  word-wrap: break-word;
 }
 
 .message.user {
-  text-align: right;
+  text-align: left;
   color: black;
   background-color: white;
   padding: 8px;
