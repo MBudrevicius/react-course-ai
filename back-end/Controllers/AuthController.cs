@@ -82,7 +82,7 @@ public class AuthController(IConfiguration config, AppDbContext dbContext) : Con
             HttpOnly = false,
             Secure = false,
             SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddHours(1)
+            Expires = DateTime.UtcNow.AddHours(9)
         });
 
         return Ok(new { message, token });

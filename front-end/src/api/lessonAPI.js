@@ -1,18 +1,25 @@
 import axios from 'axios';
 import { getCookie } from './user';
+import router from '@/router'; 
 
 const LESSONS_API_BASE_URL = 'http://localhost:5255/api/lessons';
 
 async function fetchFromLessonsAPI(endpoint) {
+    const token = getCookie('AuthToken');
     try {
-        const token = getCookie('AuthToken');
-        const response = await axios.get(`${LESSONS_API_BASE_URL}/${endpoint}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            withCredentials: true
-        });
-        return response.data;
+        if (!token) {
+            console.log("No token found lessons");
+            router.push({ name: 'login' });
+            return null;
+        }else{
+            const response = await axios.get(`${LESSONS_API_BASE_URL}/${endpoint}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                withCredentials: true
+            });
+            return response.data;
+        }
     } catch (error) {
         handleAPIError(error);
         throw error;
@@ -22,15 +29,21 @@ async function fetchFromLessonsAPI(endpoint) {
 const PROBLEMS_API_BASE_URL = 'http://localhost:5255/api/problems';
 
 async function fetchFromProblemsAPI(endpoint) {
+    const token = getCookie('AuthToken');
     try {
-        const token = getCookie('AuthToken');
-        const response = await axios.get(`${PROBLEMS_API_BASE_URL}/${endpoint}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            withCredentials: true
-        });
-        return response.data;
+        if (!token) {
+            console.log("No token found problems");
+            router.push({ name: 'login' });
+            return null;
+        }else{
+            const response = await axios.get(`${PROBLEMS_API_BASE_URL}/${endpoint}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                withCredentials: true
+            });
+            return response.data;
+        }
     } catch (error) {
         handleAPIError(error);
         throw error;

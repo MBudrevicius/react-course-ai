@@ -23,7 +23,7 @@ onMounted(async () => {
 watch(() => route.params.id, async (newId) => {
   lessonId.value = newId;
   fetchLesson();
-  fetchTasks();
+  fetchTasks(); 
 });
 
 const tutorialCompleted = localStorage.getItem('tutorialCompleted');
