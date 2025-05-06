@@ -139,7 +139,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
     public async Task<IActionResult> AudioChat([FromForm] TranscribeRequest request)
     {
         Stream fileStream = request.Audio.OpenReadStream();
-        var audioClient = new AudioClient("whisper-1", _openAiApiKey);
+        var audioClient = new AudioClient("gpt-4o-transcribe", _openAiApiKey);
         var audioOptions = new AudioTranscriptionOptions()
         {
             Language = "lt",
