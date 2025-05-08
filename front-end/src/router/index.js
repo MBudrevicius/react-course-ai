@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import LessonView from '../views/LessonView.vue'
 import SolutionEvaluation from '@/components/SolutionEvaluation.vue'
 import Cookie from 'js-cookie';
+import { isTokenExpired } from '@/api/jwt'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,15 +52,25 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const loggedIn = !!Cookie.get('AuthToken');
+  const token = Cookie.get('AuthToken')
+
+  if (token && isTokenExpired(token)) {
+    Cookie.remove('AuthToken')
+    return next({ name: 'login' })
+  }
+
+  const loggedIn = !!token
 
   if (to.meta.requiresAuth && !loggedIn) {
-    return next({ name: 'login' });
+    return next({ name: 'login' })
   }
+
   if (to.meta.guest && loggedIn) {
-    return next({ name: 'home' });
+    return next({ name: 'home' })
   }
-  next();
-});
+
+  next()
+})
+
 
 export default router
