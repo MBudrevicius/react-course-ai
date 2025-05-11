@@ -6,6 +6,7 @@ import LessonView from '../views/LessonView.vue'
 import SolutionEvaluation from '@/components/SolutionEvaluation.vue'
 import Cookie from 'js-cookie';
 import { isTokenExpired } from '@/api/jwt'
+import PurchaseView from '@/views/PurchaseView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,7 +48,13 @@ const router = createRouter({
       name: 'best-solution',
       component: SolutionEvaluation,
       meta: { requiresAuth: true }
-    }
+    },
+    {
+      path: '/purchase',
+      name: 'purchase',
+      component: PurchaseView,
+      meta: { requiresAuth: true }
+    },
   ],
 })
 
