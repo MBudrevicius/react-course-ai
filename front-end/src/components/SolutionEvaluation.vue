@@ -117,7 +117,8 @@ function downloadSubmission(code) {
             <span class="close-btn" @click="closeModal">&times;</span>
 
             <template v-if="props.mode === 'submit'">
-                <h2>Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
+                <h2 v-if="props.evaluationResult.score >= 50">Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
+                <h2 v-if="props.evaluationResult.score < 50">Deja, jums nepavyko :(</h2>
                 <p>Atsiliepimas:</p>
                 <li>{{props.evaluationResult.feedback}}</li>
                 <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
