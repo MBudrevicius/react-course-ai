@@ -65,6 +65,9 @@ async function logout(){
                 <li>
                     <a v-if="loggedIn" href="/lessons/1">Pamokos</a>
                 </li>
+                <li>
+                    <a v-if="loggedIn" href="/purchase">Pirkti</a>
+                </li>
                 <div class="rounded-rectangle">
                     <li>
                         <a v-if="loggedIn" @click="logout" href="/">Atsijungti</a>
