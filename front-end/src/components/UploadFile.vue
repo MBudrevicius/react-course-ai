@@ -141,8 +141,8 @@ input {
     width: 420px;
     margin-bottom: 20px;
     color: white;
-    background-color: #2D2D2D;
-    box-shadow: #000000 0px 0px 2px 0px;
+    background-color: #4E4E4E;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 
 input[type=file]::file-selector-button {
@@ -151,8 +151,8 @@ input[type=file]::file-selector-button {
 
 button {
     border-radius: 25px;
-    background-color:  #2D2D2D;
-    color: #916ad5;
+    background-color:  #4E4E4E;
+    color: white;
     padding: 5px;
     cursor: pointer;
     font-size: 20px;
@@ -160,6 +160,6 @@ button {
     align-self: right;
     padding-left: 15px;
     padding-right: 15px;
-    box-shadow: #000000 0px 0px 2px 0px;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 </style>
