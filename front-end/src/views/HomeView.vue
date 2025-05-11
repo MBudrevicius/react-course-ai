@@ -59,7 +59,7 @@ function get() {
     <audio id="audio" src="/src/omg.mp3"></audio>
 </template>
 
-<style>
+<style scoped>
 .footer {
     background-color: #2D2D2D;
     box-shadow: #000000 0px 0px 10px 0px inset;

@@ -63,8 +63,9 @@ onMounted(() => {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
-  background-color: #2D2D2D;
+  background-color: #333333;
   border-radius: 20px;
   justify-content: center;
+  color: white;
 }
 </style>

@@ -242,6 +242,7 @@ export default {
   right: 0;
   width: 320px;
   padding-right: 10px;
+  box-shadow: 0 20px 20px rgba(0, 0, 0, 0.15);
 }
 
 .chat-header {
@@ -268,7 +269,7 @@ export default {
   overflow-y: auto;
   padding: 16px;
   background-color: #4E4E4E;
-  height: 500px;
+  height: 40vh;
   box-shadow:rgba(0, 0, 0, 0.15) 0px 1px 3px 0px inset;
 }
 
