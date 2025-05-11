@@ -157,6 +157,7 @@ a:hover {
 p {
     font-size: 25px;
     margin-top: 20px;
+    color: white;
 }
 
 .image img {

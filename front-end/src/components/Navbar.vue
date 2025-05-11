@@ -57,10 +57,10 @@ async function logout(){
             <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul class="navbar-elements">
                 <li>
-                <a href="/#about" class="" aria-current="page">Kas tai?</a>
+                <a v-if="!loggedIn"a href="/#about" class="" aria-current="page">Kas tai?</a>
                 </li>
                 <li>
-                <a href="/#react" class="">Apie React</a>
+                <a v-if="!loggedIn" href="/#react" class="">Apie React</a>
                 </li>
                 <li>
                     <a v-if="loggedIn" href="/lessons/1">Pamokos</a>
