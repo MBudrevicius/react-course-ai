@@ -1,70 +1,122 @@
 <script setup>
 import Navbar from '../components/Navbar.vue'
-import Sidebar from '../components/Sidebar.vue'
-import { onMounted } from 'vue'
+
+function get() {
+    const audio = document.getElementById("audio");
+    audio.play();
+}
 </script>
 
 <template>
     <Navbar />  
-    <div class="hero-rectangle">
+    <div class="hero-rectangle" style="overflow: hidden;">
         <div class="hero">
             <div class="grid-container">
-                <div>
+                <div style="align-self: center;">
                     <h1 class="hero-text">Per sunkiai įkandamas riešutėlis? Tau padės</h1>
                     <h6 class="hero-text">KOMPONIONAS</h6>
                     <h1 class="hero-text">React mokymosi asistentas</h1>
                 </div>
-                <div style="display: flex; align-items: center;">
-                    <img src="/images/wawe.png" alt="penguin image">
+                <div style="overflow: hidden;">
+                    <img src="/images/wave.png" alt="waving penguin">
                 </div>
             </div>
         </div>
     </div>
+    
+    <div style="display:grid; overflow: hidden;">
+        <div class="section-rectangle">
+            <h6 class="section" id="about">Kas tai?</h6>
+        </div>
 
-    <div class="section-rectangle">
-        <h6 class="section" id="about">Kas tai?</h6>
+        <div class="section-content">
+            <h1 style="float:left"><span>Komponionas</span> – tai moderni mokymosi platforma, skirta visiems, siekiantiems gilinti savo React žinias.
+                Svetainė apjungia <span>kokybišką mokomąją medžiagą</span> ir <span>pažangų dirbtinio intelekto asistentą</span>, kuris realiuoju laiku atsako į jūsų klausimus, padeda spręsti problemas ir užtikrina sklandų mokymosi procesą.
+                Komponionas suteikia galimybę mokytis savarankiškai, išlaikant aukštą žinių kokybę ir nuoseklų progresą. Nesvarbu, ar tik pradedate, ar siekiate tobulinti jau turimas žinias - šioje mokymosi plaftormoje rasite įvairaus lygio užduočių, kurias galėsite spręsti <span>bet kuriuo paros laiku</span>.</h1>
+        </div>
+
+        <div class="section-rectangle">
+            <h6 class="section" id="react">Apie React</h6>
+        </div>
+
+        <div class="section-content">
+            <h1 style="float:left"><span>React</span> – tai viena populiariausių šiuolaikinių <span>JavaScript bibliotekų</span>, skirta kurti interaktyvias vartotojo sąsajas. 
+                Biblioteka leidžia programuotojams kurti <span>komponentais</span> pagrįstas aplikacijas, užtikrinant aiškesnę struktūrą, geresnį funkcionalumą ir lengvesnį kodų palaikymą. 
+                React žinios – <span>viena paklausiausių kompetencijų</span> šiandienos darbo rinkoje.</h1>
+        </div>
     </div>
 
-    <div class="section-content">
-        <h1 style="float:left">Šis pradedantiesiems skirtas&nbsp;<span>programavimo kursas&nbsp;</span>supažindins jus su bene populiariausia svetainių kūrimo biblioteka.</h1>
+    <div class="footer" style="overflow: hidden;">
+        <div class="text">@PVP projektas</div>
+        <div class="penguins">
+            <img src="/images/Pijus.png">
+            <button @click="get()"><img src="/images/as.png" class="hover-pointer"></button>
+            <img src="/images/Jonas.png">
+            <img src="/images/Martynas.png">
+            <img src="/images/Matas.png">
+        </div>
     </div>
-
-    <div class="section-rectangle">
-        <h6 class="section" id="contacts">Apie mus</h6>
-    </div>
-
-    <div class="section-content">
-        <h1 style="float:left"><span>React</span> – tai populiari <span>JavaScript</span> biblioteka, skirta kurti vartotojo sąsajas. Ji leidžia kūrėjams kurti <span>greitas</span>, <span>interaktyvias</span> ir <span>dinamiškas</span> interneto aplikacijas, kurios reaguoja į vartotojo veiksmus be puslapio perkrovimo.</h1>
-        <h1 style="font-size: 20px; margin-top: 200px">Šią pastraipą sugeneravo <span>ChatGPT</span>, vienas iš dirbtinio intelekto modelių. Tačiau jis naudingas ne tik teksto generavimui - jis taip pat jums padės ir besimokant React’o! Taip, iškilus mokymosi sunkumams, visuomet galėsite prašyti pagalbos <span>ChatGPT</span>, kuris lauks jūsų klausimų šioje svetainėje.</h1>
-    </div>
+    <audio id="audio" src="/src/omg.mp3"></audio>
 </template>
 
-<style>
+<style scoped>
+.footer {
+    background-color: #2D2D2D;
+    box-shadow: #000000 0px 0px 10px 0px inset;
+    padding: 30px;
+    display: grid;
+    grid-template-areas:
+    "text penguins";
+    grid-template-columns: 1fr 1fr;
+}
+
+.text {
+    grid-area: text;
+    color: gray;
+    font-size: 20px;
+    text-align: justify;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.penguins {
+    grid-area: penguins;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: #55555583 1px solid;
+    gap: 20px;
+}
+
+.penguins img {
+    width: auto;
+    height: 100px;
+}
+
+.hover-pointer:hover {
+    cursor: pointer;
+}
+
 .hero {
-    display: block;
     text-align: right;
-    padding-right: 50px;
 }
 
 .hero-rectangle {
     background-color: #2D2D2D;
-    margin-top: 100px;
+    box-shadow: #000000 0px 0px 10px 0px inset;
     margin-bottom: 100px;
-    /* display: inline-flexbox; */
-    /* vertical-align: middle; */
-    padding: 10px;
 }
 
 .section-rectangle {
     border-radius: 100px;
     background: #2D2D2D;
-    margin-top: 200px;
-    max-width: 500px;
-    text-align: center;
-    align-content: center;
     margin-left: auto;
     margin-right: auto;
     padding: 20px;
+    width: 400px;
+    text-align: center;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 
 h1.hero-text {
@@ -93,22 +145,53 @@ p {
 
 .section-content {
     font-size: 32px;
-    margin-top: 40px;
     margin-left: 200px;
     margin-right: 200px;
     text-align: justify;
     float: left;
-    margin-bottom: 100px;
     color: white;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: auto 250px;
+    grid-template-columns: auto 40vw;
+    height: 400px;
 }
 
-img {
-    height: 230px;
+.hero img {
+    height: 500px;
     width: auto;
+    margin-left: 100px;
+    margin-top: 50px;
+}
+
+@media (max-height: 960px) {
+  .hero img{
+    height: 450px;
+  }
+}
+
+@media (max-height: 840px) {
+  .hero img{
+    display: none;
+  }
+
+  .hero {
+    text-align: center;
+  }
+
+  .grid-container {
+    grid-template-columns: auto;
+    height: auto;
+    padding: 20px;
+  }
+}
+
+@media (max-height: 480px) {
+  .penguins img{
+    height: 50px;
+  }
 }
 </style>

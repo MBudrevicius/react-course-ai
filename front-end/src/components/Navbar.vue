@@ -3,6 +3,9 @@ import { ref, onMounted } from 'vue';
 import { isUserLoggedIn } from '@/api/user';
 
 const loggedIn = ref(false);
+const isSuccessCheck = ref(false);
+const errorMessage = ref('');
+const showNotification = ref(false);
 
 onMounted(async () => {
   try {
@@ -19,15 +22,27 @@ onMounted(async () => {
 async function logout(){
     try{
         document.cookie = 'AuthToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+        isSuccessCheck.value = true;
+        errorMessage = "Sėkmingai atsijungta";
+        showNotification.value = true;
+        setTimeout(() => {
+                loggedIn.value = false;
+            }, 500);
         loggedIn.value = false;
         console.log('User logged out');
+        
+
     } catch(error){
         console.log('Error logging out:', error);
+        isSuccessCheck.value = false;
+        errorMessage = "Nepavyko atsijungti";
+        showNotification.value = true;
     }
 }
 </script>
 
 <template>
+    <NotificationItem v-if="showNotification" @close="showNotification = false" :errorMessage="errorMessage" :isSuccess="isSuccessCheck"/>
     <nav class="navbar">
         <div class="flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="/">
@@ -42,13 +57,16 @@ async function logout(){
             <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul class="navbar-elements">
                 <li>
-                <a href="/#about" class="" aria-current="page">Kas tai?</a>
+                <a v-if="!loggedIn"a href="/#about" class="" aria-current="page">Kas tai?</a>
                 </li>
                 <li>
-                <a href="/#contacts" class="">Apie mus</a>
+                <a v-if="!loggedIn" href="/#react" class="">Apie React</a>
                 </li>
                 <li>
-                    <a v-if="loggedIn" href="/lessons">Pamokos</a>
+                    <a v-if="loggedIn" href="/lessons/1">Pamokos</a>
+                </li>
+                <li>
+                    <a v-if="loggedIn" href="/purchase">Pirkti</a>
                 </li>
                 <div class="rounded-rectangle">
                     <li>
@@ -66,6 +84,9 @@ async function logout(){
 .navbar {
     background-color: #2D2D2D;
     font-size: 28px;
+    box-shadow: #000000 0px 0px 10px 0px;
+    width: 100%;
+    max-height: 65px;
 }
   
 .navbar-elements {
@@ -84,5 +105,6 @@ a {
 .rounded-rectangle {
     border-radius: 20px;
     background: #4E4E4E;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 </style>

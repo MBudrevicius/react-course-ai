@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import UploadFile from '@/components/UploadFile.vue';
 
 defineProps({
   taskContent: String,
@@ -29,13 +30,14 @@ onMounted(() => {
     <button class="collapsible">Užduotis</button>
     <div class="content">
       <p v-html="taskContent"></p>
-    </div>
+      <UploadFile />
+    </div>    
   </div>
 </template>
 
 <style scoped>
 .collapsible {
-  background-color: #2D2D2D;
+  background-color: #2d2d2d;
   border-top: 2px solid #916ad5;
   color: white;
   cursor: pointer;
@@ -61,8 +63,9 @@ onMounted(() => {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
-  background-color: #2D2D2D;
+  background-color: #2d2d2d;
   border-radius: 20px;
   justify-content: center;
+  color: white;
 }
 </style>

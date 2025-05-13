@@ -25,7 +25,6 @@ watch(() => route.params.id, async (newId) => {
 onMounted(async () => {
   fetchLesson();
   fetchTasks();
-
   handleResize();
   window.addEventListener('resize', handleResize);
 

@@ -3,10 +3,15 @@ import { ref } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import { registerUser } from '../api/user';
 import router from '@/router';
+import SpinningLoader from '@/components/SpinningLoader.vue';
+import NotificationItem from '@/components/Notification.vue';
 
 const passwordFieldType = ref('password');
 const errorMessageStatus = ref(false);
 const errorMessage = ref('');
+const loading = ref(false);
+const isSuccessCheck = ref(false);
+
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 }
@@ -19,18 +24,34 @@ const formData = ref({
 
 async function register() {
     try{
+        loading.value = true;
         const result = await registerUser(formData.value);
-        if(result.status == 200){
-            router.push({ name: 'home' });
-            console.log("Success", result.respose.data);
+        console.log(result.message);
+        if(result.message === "Registration successful")
+        {
+            isSuccessCheck.value = true;
+            errorMessage.value = "Sėkmingai užsiregistruota";
+            errorMessageStatus.value = true;
+            setTimeout(() => {
+                router.push({ name: 'home' });
+            }, 500);
         }
-    } catch(error){
+    } catch (error) {
         console.log("Error", error);
         errorMessageStatus.value = true;
-        errorMessage.value = error;
-        if(typeof error ==='object'){
-            errorMessage.value = "Password is too short"
-        }  
+        isSuccessCheck.value = false;
+        const passwordError = error?.response?.data?.errors?.Password?.[0];
+        const titleError = error?.response?.data;
+
+        if (passwordError) {
+            errorMessage.value = passwordError;
+        } else if (titleError) {
+            errorMessage.value = titleError;
+        } else {
+            errorMessage.value = "Įvyko nežinoma klaida.";
+        }
+    } finally {
+        loading.value = false;
     }
 }
 
@@ -38,17 +59,16 @@ async function register() {
 
 <template>
     <Navbar />
+    <SpinningLoader v-if="loading" />
+    <NotificationItem v-if="errorMessageStatus" @close="errorMessageStatus = false" :errorMessage="errorMessage" :isSuccess="isSuccessCheck"/>
         <div class="main">
             <div class="form">
                 <h1>Susikurkite paskyrą ir pradėkite mokytis React!</h1>
-                <div v-if="errorMessageStatus" class="error-message">
-                        <p style="color: red;">{{ errorMessage }}</p>
-                </div>
                 <form @submit.prevent="register">
                     <label for="username">Elektroninis paštas</label>
                     <input type="email" id="email" name="email" v-model="formData.email" required>
                     <label for="username">Prisijungimo vardas</label>
-                    <input type="text" id="username" name="username" v-model="formData.username" required>
+                    <input type="text" id="username" name="username" v-model="formData.username" minlength="3" maxlength="20" required>
                     <div display="grid">
                         <label for="password">Slaptažodis</label>
                     </div>
@@ -146,6 +166,7 @@ a:hover {
 p {
     font-size: 25px;
     margin-top: 20px;
+    color: white;
 }
 
 .image img {
@@ -155,7 +176,7 @@ p {
 
 .image {
     position: fixed;
-    bottom: -170px;
+    bottom: -180px;
     display: flex;
     justify-content: center;
     align-items: center;

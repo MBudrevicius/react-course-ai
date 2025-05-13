@@ -3,9 +3,14 @@ import { ref, TrackOpTypes } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import { loginUser } from '../api/user';
 import router from '@/router';
+import SpinningLoader from '@/components/SpinningLoader.vue';
+import NotificationItem from '@/components/Notification.vue';
 
 const passwordFieldType = ref('password');
-const errorMessage = ref(false);
+const errorMessage = ref('');
+const loading = ref(false);
+const showNotification = ref(false);
+const isSuccessCheck = ref(false);
 
 function toggleShow() {
     passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
@@ -18,27 +23,38 @@ const formData = ref({
 
 async function login(){
     try{
+        loading.value = true;
         const result = await loginUser(formData.value);
-        if(result.status == 200){
+        console.log(result.message);
+        if(result.message === "Login successful"){
+            isSuccessCheck.value = true;
+            errorMessage.value = "Sėkmingai prisijungta";
+            showNotification.value = true;
             console.log("Success", result);
-            router.push({ name: 'home' });        
+            setTimeout(() => {
+                router.push({ name: 'home' });
+            }, 500);
         }
     } catch(error){
         console.log("Error", error);
-        errorMessage.value = true;
-    } 
+        isSuccessCheck.value = false;
+        errorMessage.value = "Neteisingas prisijungimo vardas arba slaptažodis";        
+        showNotification.value = true;
+    } finally {
+        loading.value = false;
+    }
 }
 
 </script>
 
 <template>
     <Navbar />
+    <SpinningLoader v-if="loading" />
+    <NotificationItem v-if="showNotification" @close="showNotification = false" :errorMessage="errorMessage" :isSuccess="isSuccessCheck"/>
         <div class="main">
             <div class="form">
                 <h1>Įveskite prisijungimo duomenis</h1>
-                <div v-if="errorMessage" class="error-message">
-                        <p style="color: red;">Neteisingas slaptažodis arba el. pašto adresas.</p>
-                </div>
+
                 <form @submit.prevent="login">
                     <label for="username">Prisijungimo vardas</label>
                     <input type="text" id="username" name="username" v-model="formData.usernameOrEmail" required>
@@ -54,7 +70,9 @@ async function login(){
                         </span>
                     </div>
                     <div class="rounded-rectangle">
-                        <button type="submit" class="submit">Prisijungti</button>
+                        <button type="submit" class="submit">
+                            <span v-if="!loading">Prisijungti</span>
+                        </button>
                     </div>
                 </form>
                 <p>Neturite paskyros?&nbsp;<a href="/register">Užsiregistruokite</a></p>
@@ -139,6 +157,7 @@ a:hover {
 p {
     font-size: 25px;
     margin-top: 20px;
+    color: white;
 }
 
 .image img {
