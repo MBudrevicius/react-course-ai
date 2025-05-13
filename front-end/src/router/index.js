@@ -62,6 +62,9 @@ router.beforeEach((to, from, next) => {
   const token = Cookie.get('AuthToken')
 
   if (token && isTokenExpired(token)) {
+    if (!from.meta.guest && from.fullPath !== '/') {
+      localStorage.setItem('lastVisitedRoute', from.fullPath);
+    }
     Cookie.remove('AuthToken')
     return next({ name: 'login' })
   }
@@ -69,6 +72,9 @@ router.beforeEach((to, from, next) => {
   const loggedIn = !!token
 
   if (to.meta.requiresAuth && !loggedIn) {
+    if (to.fullPath !== '/') {
+      localStorage.setItem('lastVisitedRoute', to.fullPath);
+    }
     return next({ name: 'login' })
   }
 
