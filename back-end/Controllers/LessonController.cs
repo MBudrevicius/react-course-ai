@@ -2,8 +2,6 @@ using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models.Db;
-using Models.Request;
 using Serilog;
 
 [Route("api/lessons")]
@@ -18,6 +16,7 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
     public async Task<IActionResult> GetTitles()
     {
         var lessonTitles = await _dbContext.Lessons
+            .AsNoTracking()
             .OrderBy(l => l.OrderIndex)
             .Select(l => new { l.Id, l.Title, l.Premium })
             .ToListAsync();
@@ -32,6 +31,7 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
             return Unauthorized(GetUserResult.Errors.First().Message);
 
         var lesson = await _dbContext.Lessons
+            .AsNoTracking()
             .Where(l => l.Id == lessonId)
             .FirstOrDefaultAsync();
 
@@ -48,25 +48,5 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
         }
 
         return Ok(lesson);
-    }
-
-    [HttpPost("add")]
-    public async Task<IActionResult> AddLesson([FromBody] LessonRequest lesson)
-    {
-        // Comment next 2 lines to enable lesson adding
-        _logger.Error($"Adding lessons is forbidden.");
-        return Forbid("Adding lessons is forbidden.");
-
-        int lastOrderIndex = await _dbContext.Lessons.MaxAsync(l => (int?)l.OrderIndex) ?? 0;
-        var newLesson = new Lesson
-        {
-            Title = lesson.Title,
-            Content = lesson.Content,
-            OrderIndex = lastOrderIndex + 1
-        };
-
-        _dbContext.Lessons.Add(newLesson);
-        await _dbContext.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetLesson), new { lessonId = newLesson.Id }, newLesson);
     }
 }

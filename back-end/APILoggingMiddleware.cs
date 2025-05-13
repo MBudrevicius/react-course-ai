@@ -1,15 +1,10 @@
 using Serilog;
 using System.Text;
 
-public class APILoggingMiddleware
+public class APILoggingMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
+    private readonly RequestDelegate _next = next;
     private readonly Serilog.ILogger _logger = Log.ForContext<APILoggingMiddleware>();
-
-    public APILoggingMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
 
     public async Task Invoke(HttpContext context)
     {

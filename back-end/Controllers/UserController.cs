@@ -20,6 +20,7 @@ public class UserController(AppDbContext dbContext) : ControllerBase
             return Unauthorized(GetUserResult.Errors.First().Message);
 
         var user = await _dbContext.Users
+            .AsNoTracking()
             .Where(u => u.Id == GetUserResult.Value.Id)
             .FirstOrDefaultAsync();
 
