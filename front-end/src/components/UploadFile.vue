@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { getTasksByLessonId, getBestSubmissionByProblemId } from '../api/lessonAPI';
+import { getTasksByLessonId, getBestSubmissionByProblemId } from '@/api/problemAPI';
 import SolutionEvaluation from './SolutionEvaluation.vue';
-import { getEvaluation } from '@/api/evaluationAPI';
+import { getEvaluation } from '@/api/AiAPI';
 import { useRoute } from 'vue-router'
 import SpinningLoader from './SpinningLoader.vue';
 import NotificationItem from './Notification.vue';
@@ -53,11 +53,9 @@ function closeScoreModal() {
 }
 
 async function sendFile(){
-
-        const tasks = await getTasksByLessonId(lessonId.value);
-        const response = await getEvaluation(tasks[0].id, { codeSubmission: fileContent.value });
-        evaluationResult.value = response;
-
+    const tasks = await getTasksByLessonId(lessonId.value);
+    const response = await getEvaluation(tasks[0].id, { codeSubmission: fileContent.value });
+    evaluationResult.value = response;
 }
 
 function readSubmission(event) {

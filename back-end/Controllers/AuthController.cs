@@ -84,6 +84,13 @@ public class AuthController(IConfiguration config, AppDbContext dbContext) : Con
             SameSite = SameSiteMode.Lax,
             Expires = DateTime.UtcNow.AddHours(9)
         });
+        Response.Cookies.Append("UserType", user.Premium ? "premium" : "free", new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTime.UtcNow.AddHours(9)
+        });
 
         return Ok(new { message, token });
     }

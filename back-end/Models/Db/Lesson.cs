@@ -15,4 +15,7 @@ public class Lesson
 
     [Required]
     public required string Content { get; set; }
+
+    [Required]
+    public bool Premium { get; set; } = true;
 }

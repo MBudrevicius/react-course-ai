@@ -1,36 +1,35 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getLessonsTitles } from '../api/lessonAPI'
-import { isUserLoggedIn } from '../api/user'
+import { ref, onMounted } from 'vue';
+import { getLessonsTitles } from '@/api/lessonAPI';
+import { getCookie } from '@/api/APIRequest';
 
-const loggedIn = ref(false)
-const lessons = ref([])
+const lessons = ref([]);
+const isPremiumUser = ref(false);
 
 onMounted(async () => {
+  isPremiumUser.value = getCookie('UserType') === 'premium';
   try {
-    const userLoggedIn = await isUserLoggedIn()
-    if (userLoggedIn) {
-      loggedIn.value = true
-      const data = await getLessonsTitles()
-      lessons.value = data || []
-      console.log('Lessons:', lessons.value)
-    }
-  } catch (error) {
-    console.log('Error checking user login status:', error);
-    loggedIn.value = false;
-  }
+    const data = await getLessonsTitles();
+    console.log("111:" + data);
+    lessons.value = data || [];
+  } catch (error) {}
 })
 </script>
 
 <template>
-  <div v-if="loggedIn" class="sidebar-container">
+  <div class="sidebar-container">
     <div class="sidebar">
       <div class="sidebar-item">
         <img src="/svg/book.svg" class="svg" />
       </div>
       <ul>
         <li v-for="(lesson, index) in lessons" :key="lesson.id">
-          <router-link :to="`/lessons/${lesson.id}`" class="lesson-link">
+          <router-link
+            :to="`/lessons/${lesson.id}`"
+            class="lesson-link"
+            :class="{ disabled: lesson.premium && !isPremiumUser }"
+            @click.prevent="lesson.premium && !isPremiumUser ? null : undefined"
+          >
             {{ index + 1 }}. {{ lesson.title }}
           </router-link>
         </li>
@@ -97,4 +96,9 @@ a {
   text-decoration: none;
 }
 
+.lesson-link.disabled {
+  color: grey;
+  pointer-events: none;
+  cursor: not-allowed;
+}
 </style>

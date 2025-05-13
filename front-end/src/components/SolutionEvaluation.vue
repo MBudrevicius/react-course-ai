@@ -1,81 +1,56 @@
 <script setup>
-import { defineEmits, defineProps, ref, onMounted, watch } from 'vue';
-import { getTasksByLessonId, getBestSubmissionByProblemId } from '../api/lessonAPI';
+import { defineEmits, defineProps, ref, onMounted } from 'vue';
+import { getTasksByLessonId, getBestSubmissionByProblemId } from '@/api/problemAPI';
 import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const emit = defineEmits(['close']);
-const submission = ref('');
+const route = useRoute();
 const lessonId = ref(route.params.id);
-const taskContent = ref('No tasks available')
 const taskId = ref('');
+const submission = ref('');
 
 onMounted(async () => {
     await fetchTasks();
     await fetchSubmission();
-    await setStyle();
+    setStyle();
 })
 
-// watch(() => route.params.id, async (newId) => {
-//     lessonId.value = newId;
-//     fetchSubmission();
-//     fetchTasks();
-// });
-
 async function fetchTasks() {
-  try {
-    const tasks = await getTasksByLessonId(lessonId.value);
-    taskContent.value = tasks.length > 0 ? tasks[0].question : 'No tasks available';
-    console.log('Tasks:', tasks);
-    taskId.value = tasks[0].id;
-  } catch (error) {
-    console.log('Error fetching tasks:', error);
-    taskContent.value = 'Error fetching tasks';
-  }
+    try {
+        const tasks = await getTasksByLessonId(lessonId.value);
+        taskId.value = tasks[0].id;
+    } catch (error) {}
 }
 
 async function fetchSubmission() {
-  try {
-    submission.value = await getBestSubmissionByProblemId(taskId.value);
-    // submissionScore.Score = submissions.Score > 0 ? submissions[0].Score : 'Jūs dar nepateikėte sprendimo šiai užduočiai';
-  } catch (error) {
-    console.log('Error fetching submissions:', error);
-    // submissionScore.value = 'Error fetching submissions';
-  }
+    try {
+        submission.value = await getBestSubmissionByProblemId(taskId.value);
+    } catch (error) {}
 }
 
-async function setStyle() {
+function setStyle() {
     if (props.mode == 'submit') {
         document.getElementById("evaluation").style.width = props.evaluationResult.score + "%";
-        
-        if (props.evaluationResult.score >= 40 && props.evaluationResult.score < 80)
-        {
-            document.getElementById("evaluation").style.background = '#c78c06';
-        }
-        else if (props.evaluationResult.score >= 80)
-        {
+        if (props.evaluationResult.score >= 80) {
             document.getElementById("evaluation").style.background = '#22992c';
         }
-            
-    } else if (props.mode == 'best-solution') {
-        document.getElementById("best-solution").style.width = submission.value.score + "%";
-
-        if (submission.value.score >= 40 && submission.value.score < 80)
-        {
-            document.getElementById("best-solution").style.background = '#c78c06';
+        else if (props.evaluationResult.score >= 40) {
+            document.getElementById("evaluation").style.background = '#c78c06';
         }
-        else if (submission.value.score >= 80)
-        {
+    }
+    else if (props.mode == 'best-solution') {
+        document.getElementById("best-solution").style.width = submission.value.score + "%";
+        if (submission.value.score >= 80) {
             document.getElementById("best-solution").style.background = '#22992c';
         }
-            
+        else if (submission.value.score >= 40 && submission.value.score < 80) {
+            document.getElementById("best-solution").style.background = '#c78c06';
+        }
     }
 
     const scoreElement = document.getElementById(props.mode === 'submit' ? "evaluation-score" : "best-solution-score");
-
     let targetScore = props.mode === 'submit' ? props.evaluationResult.score : submission.value.score;
     let currentScore = 0;
-
     const interval = setInterval(() => {
         if (currentScore < targetScore) {
             currentScore++;
@@ -120,14 +95,14 @@ function downloadSubmission(code) {
                 <h2 v-if="props.evaluationResult.score >= 50">Sveikiname! Sėkmingai įvykdėte užduotį!</h2>
                 <h2 v-if="props.evaluationResult.score < 50">Deja, jums nepavyko :(</h2>
                 <p>Atsiliepimas:</p>
-                <li>{{props.evaluationResult.feedback}}</li>
+                <li>{{ props.evaluationResult.feedback }}</li>
                 <p style="font-size: 18px; margin-top: 5px;">Galutinis rezultatas:</p>
                 <div class="progress-container">
                     <div class="progress-bar" id="evaluation"></div>
                     <span class="percentage" id="evaluation-score">0%</span>
                 </div>
             </template>
-            
+
             <template v-if="props.mode === 'best-solution'">
                 <h2>Geriausias sprendimas</h2>
                 <p style="font-size: 18px; margin-top: 5px;">Rezultatas:</p>
@@ -136,7 +111,7 @@ function downloadSubmission(code) {
                     <span class="percentage" id="best-solution-score">0%</span>
                 </div>
                 <p style="font-size: 18px; margin-top: 5px;">Pastabos:</p>
-                <p style="font-size: 18px; margin-top: 5px; font-style: italic;">{{submission.feedback}}</p>
+                <p style="font-size: 18px; margin-top: 5px; font-style: italic;">{{ submission.feedback }}</p>
                 <button @click="downloadSubmission(submission.code)">Atsisiųsti</button>
             </template>
         </div>
@@ -156,7 +131,7 @@ function downloadSubmission(code) {
     min-width: 50px;
     text-align: right;
     display: flex;
-    margin-top: 10px; 
+    margin-top: 10px;
 }
 
 .progress-bar {
@@ -228,5 +203,4 @@ button {
     margin-left: auto;
     margin-right: auto;
 }
-
 </style>
