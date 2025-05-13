@@ -325,12 +325,52 @@ p.theory {
   border-radius: 3px;
   font-size: 0.9em;
 }
+.theory table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+  color: white;
+  background-color: #2d2d2d;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theory th {
+  font-size: 18px;
+  background-color: #3d3d3d;
+  text-align: left;
+  padding: 12px;
+  font-weight: bold;
+  border-bottom: 2px solid #916ad5;
+}
+
+.theory td {
+  font-size: 16px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #444;
+}
+
+.theory tr:last-child td {
+  border-bottom: none;
+}
+
+.theory td:hover, .theory th:hover {
+  background-color: #3a3a3a;
+}
 
 @media (max-width: 960px) {
   .theory pre {
     font-size: 15px;
     padding: 10px;
     margin: 16px 0;
+  }
+  .theory table {
+    font-size: 15px;
+  }
+  
+  .theory th, .theory td {
+    padding: 10px;
   }
 }
 
@@ -345,6 +385,13 @@ p.theory {
   .theory code {
     font-size: 0.85em;
     padding: 1px 4px;
+  }
+  .theory table {
+    font-size: 14px;
+  }
+  
+  .theory th, .theory td {
+    padding: 8px;
   }
 }
 

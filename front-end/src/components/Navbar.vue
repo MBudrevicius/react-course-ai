@@ -107,4 +107,19 @@ a {
     background: #4E4E4E;
     box-shadow: #000000 0px 0px 4px 0px;
 }
+@media (max-width: 768px) {
+  .navbar-elements {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  a {
+    margin: 5px 0;
+  }
+  
+  .rounded-rectangle {
+    width: 100%;
+    text-align: center;
+  }
+}
 </style>
