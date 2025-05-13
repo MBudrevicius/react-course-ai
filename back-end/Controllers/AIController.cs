@@ -127,7 +127,6 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
             _logger.Error($"OpenAI didn't respond to user chat message. (Chat message: '{request.Message}')");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
-
         _logger.Information($"OpenAI response for chat message: '{response.Item1}'");
 
         return Ok(new { reply = response.Item1, contextId = response.Item2 });
@@ -151,7 +150,6 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
             _logger.Error("OpenAI didn't respond to transcribe request.");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
-
         _logger.Information($"OpenAI response for audio transcription: '{response.Value.Text}'");
 
         return Ok(new { message = response.Value.Text });
@@ -175,6 +173,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         if (contextId != null)
         {
             var history = await _dbContext.ChatHistory
+                .AsNoTracking()
                 .Where(h => h.ContextId == contextId)
                 .OrderBy(h => h.OrderIndex)
                 .ToListAsync();
