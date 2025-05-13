@@ -18,6 +18,7 @@
   animation: l10 2s infinite linear;
   position: relative;
 }
+
 .loader:before {
   content: "";
   border-radius: inherit;
@@ -25,7 +26,6 @@
   transform: rotate(45deg);
 }
 @keyframes l10 {to{transform: rotate(.5turn)}}
-
 
 .loader-container {
     position: fixed;

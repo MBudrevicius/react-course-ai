@@ -1,20 +1,19 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { isUserLoggedIn } from '@/api/user';
+import { getCookie } from '@/api/APIRequest';
 
 const loggedIn = ref(false);
+const premiumUser = ref(false);
 const isSuccessCheck = ref(false);
 const errorMessage = ref('');
 const showNotification = ref(false);
 
 onMounted(async () => {
   try {
-    const result = isUserLoggedIn();
-    loggedIn.value = result;
-    console.log(result);
-    console.log('User is logged in:', loggedIn.value);
+    premiumUser.value = getCookie('UserType') === 'premium';
+    loggedIn.value = isUserLoggedIn();
   } catch (error) {
-    console.log('Error checking user login status:', error);
     loggedIn.value = false;
   }
 });
@@ -22,20 +21,14 @@ onMounted(async () => {
 async function logout(){
     try{
         document.cookie = 'AuthToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-        isSuccessCheck.value = true;
-        errorMessage = "Sėkmingai atsijungta";
-        showNotification.value = true;
-        setTimeout(() => {
-                loggedIn.value = false;
-            }, 500);
         loggedIn.value = false;
-        console.log('User logged out');
-        
 
-    } catch(error){
-        console.log('Error logging out:', error);
+        errorMessage.value = "Sėkmingai atsijungta";
+        isSuccessCheck.value = true;
+        showNotification.value = true;
+    } catch(error) {
+        errorMessage.value = "Nepavyko atsijungti";
         isSuccessCheck.value = false;
-        errorMessage = "Nepavyko atsijungti";
         showNotification.value = true;
     }
 }
@@ -57,16 +50,16 @@ async function logout(){
             <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul class="navbar-elements">
                 <li>
-                <a v-if="!loggedIn"a href="/#about" class="" aria-current="page">Kas tai?</a>
+                    <a v-if="!loggedIn" a href="/#about" class="" aria-current="page">Kas tai?</a>
                 </li>
                 <li>
-                <a v-if="!loggedIn" href="/#react" class="">Apie React</a>
+                    <a v-if="!loggedIn" href="/#react" class="">Apie React</a>
                 </li>
                 <li>
                     <a v-if="loggedIn" href="/lessons/1">Pamokos</a>
                 </li>
                 <li>
-                    <a v-if="loggedIn" href="/purchase">Pirkti</a>
+                    <a v-if="loggedIn && !premiumUser" href="/purchase">Pirkti</a>
                 </li>
                 <div class="rounded-rectangle">
                     <li>
@@ -107,6 +100,7 @@ a {
     background: #4E4E4E;
     box-shadow: #000000 0px 0px 4px 0px;
 }
+
 @media (max-width: 768px) {
   .navbar-elements {
     flex-direction: column;
