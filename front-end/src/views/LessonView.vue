@@ -2,11 +2,15 @@
 import Navbar from '../components/Navbar.vue'
 import SideBar from '../components/Sidebar.vue'
 import Task from '@/components/Task.vue';
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { getLessonById, getTasksByLessonId } from '../api/lessonAPI'
 import ChatSidePanel from '@/components/ChatSidePanel.vue';
 import Tutorial from '@/components/Tutorial.vue';
+
+import hljs from 'highlight.js';
+import 'highlight.js/styles/atom-one-dark.css';
+
 
 const route = useRoute()
 const lessonId = ref(route.params.id)
@@ -18,13 +22,13 @@ const sidebarOpen = ref(true);
 
 watch(() => route.params.id, async (newId) => {
   lessonId.value = newId;
-  fetchLesson();
-  fetchTasks();
+  await fetchLesson();
+  await fetchTasks();
 });
 
 onMounted(async () => {
-  fetchLesson();
-  fetchTasks();
+  await fetchLesson();
+  await fetchTasks();
   handleResize();
   window.addEventListener('resize', handleResize);
 
@@ -49,6 +53,12 @@ const handleResize = () => {
   }
 };
 
+function highlightCodeBlocks() {
+  document.querySelectorAll('.theory pre code').forEach((block) => {
+    hljs.highlightElement(block);
+  });
+}
+
 function closeTutorial() {
   showTutorial.value = false;
   localStorage.setItem('tutorialCompleted', 'true');
@@ -62,7 +72,14 @@ async function fetchLesson() {
   try {
     const lesson = await getLessonById(lessonId.value);
     lessonTitle.value = lesson.title;
-    lessonContent.value = lesson.content;
+    
+    lessonContent.value = lesson.content.replace(
+      /<pre class="theory"><code>([\s\S]*?)<\/code><\/pre>/g, 
+      (_, code) => `<pre class="theory"><code class="language-jsx">${code.replace(/<br>/g, '\n')}</code></pre>`
+    );
+    
+    await nextTick();
+    highlightCodeBlocks();
   } catch (error) {
     console.log('Error fetching lesson:', error);
   }
@@ -216,6 +233,14 @@ async function fetchTasks() {
     margin-left: 20px;
     margin-right: 20px;
   }
+  
+  .theory table {
+    font-size: 15px;
+  }
+  
+  .theory th, .theory td {
+    padding: 10px;
+  }
 }
 @media (max-width: 768px) {
   h1.theory {
@@ -230,6 +255,14 @@ async function fetchTasks() {
   
   .theory pre {
     font-size: 15px;
+  }
+
+  .theory table {
+    font-size: 14px;
+  }
+  
+  .theory th, .theory td {
+    padding: 8px;
   }
 }
 @media (max-width: 480px) {
@@ -260,9 +293,18 @@ async function fetchTasks() {
     font-size: 16px;
   }
   
-  .theory pre {
-    font-size: 14px;
-    padding: 8px;
+    
+  .theory pre::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .theory pre::-webkit-scrollbar-thumb {
+    background-color: #916ad5;
+    border-radius: 2px;
+  }
+  
+  .theory pre::-webkit-scrollbar-track {
+    background-color: #3d3d3d;
   }
   
   .task {
@@ -303,9 +345,18 @@ p.theory {
   font-weight: bold;
 }
 
+/* Pridėkite šiuos stilius nuorodoms */
+.theory a {
+  color: #916ad5; /* violetinė spalva, kaip ir kituose elementuose */
+  text-decoration: none;
+}
+
+.theory a:hover {
+  color: #9f7cda; /* šviesesnė violetinė spalva */
+  text-decoration: underline;
+}
+
 .theory pre {
-  background-color: #2d2d2d;
-  color: #f8f8f2;
   padding: 10px;
   border-radius: 5px;
   overflow-x: auto;
@@ -315,16 +366,16 @@ p.theory {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   border-left: 3px solid #916ad5;
   max-width: 100%;
+  white-space: pre-wrap;
 }
 
 .theory code {
   font-family: 'Courier New', Courier, monospace;
-  color: #f8f8f2;
-  background-color: #3d3d3d;
   padding: 2px 5px;
   border-radius: 3px;
   font-size: 0.9em;
 }
+
 .theory table {
   border-collapse: collapse;
   width: 100%;
@@ -357,69 +408,5 @@ p.theory {
 
 .theory td:hover, .theory th:hover {
   background-color: #3a3a3a;
-}
-
-@media (max-width: 960px) {
-  .theory pre {
-    font-size: 15px;
-    padding: 10px;
-    margin: 16px 0;
-  }
-  .theory table {
-    font-size: 15px;
-  }
-  
-  .theory th, .theory td {
-    padding: 10px;
-  }
-}
-
-@media (max-width: 768px) {
-  .theory pre {
-    font-size: 14px;
-    padding: 8px;
-    border-radius: 4px;
-    margin: 14px 0;
-  }
-  
-  .theory code {
-    font-size: 0.85em;
-    padding: 1px 4px;
-  }
-  .theory table {
-    font-size: 14px;
-  }
-  
-  .theory th, .theory td {
-    padding: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .theory pre {
-    font-size: 13px;
-    padding: 6px;
-    border-radius: 3px;
-    border-left: 2px solid #916ad5;
-    margin: 12px 0;
-    line-height: 1.4;
-  }
-  
-  .theory code {
-    padding: 1px 3px;
-  }
-  
-  .theory pre::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  .theory pre::-webkit-scrollbar-thumb {
-    background-color: #916ad5;
-    border-radius: 2px;
-  }
-  
-  .theory pre::-webkit-scrollbar-track {
-    background-color: #3d3d3d;
-  }
 }
 </style>
