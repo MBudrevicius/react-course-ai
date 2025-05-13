@@ -19,7 +19,7 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
     {
         var lessonTitles = await _dbContext.Lessons
             .OrderBy(l => l.OrderIndex)
-            .Select(l => new { l.Id, l.Title })
+            .Select(l => new { l.Id, l.Title, l.Premium })
             .ToListAsync();
         return Ok(lessonTitles);
     }
@@ -27,14 +27,24 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
     [HttpGet("{lessonId}")]
     public async Task<IActionResult> GetLesson(int lessonId)
     {
+        var GetUserResult = await UserHelper.GetCurrentUserAsync(User, _dbContext, _logger);
+        if (GetUserResult.IsFailed)
+            return Unauthorized(GetUserResult.Errors.First().Message);
+
         var lesson = await _dbContext.Lessons
             .Where(l => l.Id == lessonId)
             .FirstOrDefaultAsync();
 
-        if (lesson == null)
+        if(lesson == null)
         {
             _logger.Error($"Lesson not found with ID: '{lessonId}'.");
             return NotFound();
+        }
+
+        if(lesson.Premium && !GetUserResult.Value.Premium)
+        {
+            _logger.Error($"Non premium user with ID: '{GetUserResult.Value.Id}' tried to access premium lesson: '{lesson.Title}'.");
+            return Forbid("This lesson is only available for premium users.");
         }
 
         return Ok(lesson);
@@ -43,6 +53,10 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
     [HttpPost("add")]
     public async Task<IActionResult> AddLesson([FromBody] LessonRequest lesson)
     {
+        // Comment next 2 lines to enable lesson adding
+        _logger.Error($"Adding lessons is forbidden.");
+        return Forbid("Adding lessons is forbidden.");
+
         int lastOrderIndex = await _dbContext.Lessons.MaxAsync(l => (int?)l.OrderIndex) ?? 0;
         var newLesson = new Lesson
         {
