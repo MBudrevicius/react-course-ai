@@ -3,21 +3,14 @@ import { ref, onMounted } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import SpinningLoader from '@/components/SpinningLoader.vue';
 import VueApexCharts from "vue3-apexcharts";
+import { getSolutions } from '@/api/userAPI';
 
-onMounted(async () => {
-  try {
-    const data = await getSolutions();
-    console.log("111:" + data);
-  } catch (error) {}
-})
-const loading = ref(false);
-
-const series = [20, 80];
-
-const options = {
+const loading = ref(true);
+const series = ref([0, 0]);
+const options = ref({
   legend: {
     show: false
-},
+  },
   chart: {
     type: 'donut'
   },
@@ -27,12 +20,12 @@ const options = {
         labels: {
           show: false,
           name: {
-            show: false  // Hide the name label
+            show: false
           },
           value: {
             show: true,
             fontSize: '24px',
-            color: '#fff' // Optional: white text
+            color: '#fff'
           }
         }
       }
@@ -40,10 +33,35 @@ const options = {
   },
   colors:['#916ad5', '#333333'],
   dataLabels: {
-    enabled: false  // Hide slice labels outside the donut
+    enabled: false
   }
-};
+});
 
+const successfulLessons = ref([]);
+const lessonsNeedingImprovement = ref([]);
+const averageScore = ref(0);
+
+onMounted(async () => {
+  try {
+    const data = await getSolutions();
+    const scores = data.map(item => item.score);
+    const totalLessons = scores.length;
+    const completedLessons = data.filter(item => item.score >= 50);
+    const percentComplete = Math.round((completedLessons.length / totalLessons) * 100);
+
+    series.value = [percentComplete, 100 - percentComplete];
+
+    successfulLessons.value = completedLessons.map(item => item.lessonTitle);
+    lessonsNeedingImprovement.value = data.filter(item => item.score < 50).map(item => item.lessonTitle);
+
+    const totalScore = scores.reduce((sum, val) => sum + val, 0);
+    averageScore.value = (totalScore / totalLessons).toFixed(1);
+
+  } catch (error) {
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -51,17 +69,20 @@ const options = {
   <SpinningLoader v-if="loading" />
   <div class="container">
     <h1>Pažangumas</h1>
-    <p>Įvykdei 20% užduočių</p>
+    <p>Įvykdei {{ series[0] }}% užduočių</p>
     <VueApexCharts width="300" type="donut" :options="options" :series="series" />
-    <p>Vidurkis: 4,5</p>
+    <p>Vidurkis: {{ averageScore }}</p>
+
     <div class="container">
-        <h1>Tau puikiai sekėsi atlikti šias užduotis:</h1>
-        <p>Įvadas į React</p>
+      <h1>Tau puikiai sekėsi atlikti šias užduotis:</h1>
+      <p v-if="successfulLessons.length === 0">Nėra užduočių su pažanga.</p>
+      <p v-for="lesson in successfulLessons" :key="lesson">{{ lesson }}</p>
     </div>
+
     <div class="container">
-        <h1>Dar reikia pasistengti šiose temose:</h1>
-        <p>Komponentai ir JSX</p>
-        <p>Formos ir vartotojo įvestis</p>
+      <h1>Dar reikia pasistengti šiose temose:</h1>
+      <p v-if="lessonsNeedingImprovement.length === 0">Nėra neišspręstų užduočių.</p>
+      <p v-for="lesson in lessonsNeedingImprovement" :key="lesson">{{ lesson }}</p>
     </div>
   </div>
 </template>
