@@ -59,7 +59,7 @@ function get() {
     <audio id="audio" src="/src/omg.mp3"></audio>
 </template>
 
-<style>
+<style scoped>
 .footer {
     background-color: #2D2D2D;
     box-shadow: #000000 0px 0px 10px 0px inset;
@@ -156,7 +156,7 @@ p {
 
 .grid-container {
     display: grid;
-    grid-template-columns: auto 800px;
+    grid-template-columns: auto 40vw;
     height: 400px;
 }
 
@@ -165,5 +165,33 @@ p {
     width: auto;
     margin-left: 100px;
     margin-top: 50px;
+}
+
+@media (max-height: 960px) {
+  .hero img{
+    height: 450px;
+  }
+}
+
+@media (max-height: 840px) {
+  .hero img{
+    display: none;
+  }
+
+  .hero {
+    text-align: center;
+  }
+
+  .grid-container {
+    grid-template-columns: auto;
+    height: auto;
+    padding: 20px;
+  }
+}
+
+@media (max-height: 480px) {
+  .penguins img{
+    height: 50px;
+  }
 }
 </style>

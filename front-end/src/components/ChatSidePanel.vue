@@ -1,14 +1,11 @@
 <script>
-import { sendMessage, sendAudio } from '../api/chatAPI';
-import { useSpeechRecognition } from '@vueuse/core';
+import { sendAIMessage, sendAIAudio } from '@/api/AiAPI';
+import hljs from 'highlight.js';
+import { nextTick } from 'vue';
 
 export default {
   name: 'ChatSidePanel',
   props: {
-    lessonId: {
-      type: [String, Number],
-      default: null
-    },
     lessonTitle: {
       type: String,
       default: ''
@@ -24,63 +21,94 @@ export default {
       mediaRecorder: null
     }
   },
+  mounted() {
+    nextTick(() => {
+      this.highlightCodeInMessages();
+    });
+  },
   methods: {
     togglePanel() {
       this.isCollapsed = !this.isCollapsed;
     },
+
+    formatMessage(message) {
+      return message.replace(
+        /```(jsx|javascript|js|html|css)?\n?([\s\S]*?)```/g,
+        (_, language, code) => {
+          const lang = language || 'jsx'; 
+          return `<pre class="code-block"><code class="language-${lang}">${code}</code></pre>`;
+        }
+      );
+    },
+
+    highlightCodeInMessages() {
+      nextTick(() => {
+        document.querySelectorAll('.message pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      });
+    },
+
     async handleSubmit() {
       if (!this.userInput.trim()) return;
+
       const userMessage = this.userInput;
       this.messages.push({ role: 'user', content: userMessage });
       this.userInput = '';
 
       try {
         let contextInfo = '';
-        if (this.lessonId && this.lessonTitle) {
-          contextInfo = `[Naudotojas šiuo metu skaito pamoką (atsižvelk į tai): "${this.lessonTitle}" (ID: ${this.lessonId})]`;
+        if (this.lessonTitle) {
+          contextInfo = `[Context: Naudotojas šiuo metu atsidaręs React pamoką skaito pamoką (atsižvelk į tai): "${this.lessonTitle}"]`;
         }
         
-        const response = await sendMessage({
-          message: contextInfo ? `${contextInfo}\n\n${userMessage}` : userMessage,
+        const response = await sendAIMessage({
+          message: `${contextInfo} \n ${userMessage}`,
           contextId: this.contextId
         });
-        
-        this.messages.push({ role: 'assistant', content: response.reply });
+        const formattedReply = this.formatMessage(response.reply);
+        this.messages.push({ 
+          role: 'assistant', 
+          content: formattedReply,
+          formatted: true
+        });
         
         if (response.contextId) {
           this.contextId = response.contextId;
         }
+        
+        this.highlightCodeInMessages();
       } catch (error) {
-        console.error('Error calling backend:', error);
         this.messages.push({
           role: 'assistant',
-          content: 'Sorry, there was an error. Please try again.'
+          content: 'Atsiprašome, įvyko klaida. Bandykite dar kartą.'
         });
       }
     },
+
     async startRecording() {
       this.isClicked = true;
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.mediaRecorder = new MediaRecorder(stream);
       const audioChunks = [];
+
       this.mediaRecorder.ondataavailable = (event) => {
         audioChunks.push(event.data);
       };
+
       this.mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type : 'audio/webm' });
-
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
 
-        const response = await sendAudio(formData);
-
+        const response = await sendAIAudio(formData);
         this.messages.push({ role: 'user', content: response.message });
 
-        const responseAI = await sendMessage({
+        const responseAI = await sendAIMessage({
           message: response.message,
           contextId: this.contextId
         });
-
         this.messages.push({ role: 'assistant', content: responseAI.reply });
       }
 
@@ -90,6 +118,7 @@ export default {
         this.isClicked = false;
       }, 10000);
     },
+
     async stopRecording() {
       if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
         this.mediaRecorder.stop();
@@ -102,7 +131,7 @@ export default {
 
 <template>
   <div class="chat-container">
-    <button class="chat-toggle-button" @click="togglePanel"  v-if="isCollapsed">
+    <button class="chat-toggle-button" @click="togglePanel" v-if="isCollapsed">
        <img src="/svg/chat.svg" class="svg"/>
     </button>
 
@@ -119,14 +148,11 @@ export default {
         </div>
 
         <div class="messages-container">
-          <div
-            v-for="(msg, index) in messages"
-            :key="index"
-            :class="['message', msg.role]"
-          >
-           {{ msg.content }}
-          </div>
-        </div>
+      <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.role]">
+        <div v-if="msg.formatted" v-html="msg.content"></div>
+        <div v-else>{{ msg.content }}</div>
+      </div>
+    </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
           <button type="button" class="mic-button" @click="startRecording" v-if="!isClicked" id="mic">
@@ -141,7 +167,6 @@ export default {
             class="chat-input"
             placeholder="Reikia pagalbos?"
           />
-          
           <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg"/></button>
         </form>
       </div>
@@ -225,23 +250,13 @@ export default {
 }
 
 .chat-panel {
-  /* position: fixed;
-  top: 0;
-  height: 100%;
-  top: 67px;
-  right: 0;
-  width: 320px; */
-  /* background-color: #fff;
-  border-left: 1px solid #ccc;
-  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column; */
   position: fixed;
   right: 40px;
   bottom: 0;
   right: 0;
   width: 320px;
   padding-right: 10px;
+  box-shadow: 0 20px 20px rgba(0, 0, 0, 0.15);
 }
 
 .chat-header {
@@ -268,7 +283,7 @@ export default {
   overflow-y: auto;
   padding: 16px;
   background-color: #4E4E4E;
-  height: 500px;
+  height: 40vh;
   box-shadow:rgba(0, 0, 0, 0.15) 0px 1px 3px 0px inset;
 }
 
@@ -317,5 +332,33 @@ export default {
   margin-left: 8px;
   cursor: pointer;
   filter: invert(47%) sepia(72%) saturate(467%) hue-rotate(219deg) brightness(88%) contrast(89%);
+}
+</style>
+
+<style>
+.code-block {
+  background-color: #2d2d2d;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  margin: 8px 0;
+  border-left: 2px solid #916ad5;
+  white-space: pre;
+}
+
+.message.assistant code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+.message.assistant p {
+  margin: 8px 0;
+}
+
+.message.assistant a {
+  color: #e3d5ff;
+  text-decoration: underline;
 }
 </style>

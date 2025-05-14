@@ -31,8 +31,14 @@ async function login(){
             errorMessage.value = "Sėkmingai prisijungta";
             showNotification.value = true;
             console.log("Success", result);
+            const lastVisitedRoute = localStorage.getItem('lastVisitedRoute');            
             setTimeout(() => {
-                router.push({ name: 'home' });
+                if (lastVisitedRoute) {
+                    localStorage.removeItem('lastVisitedRoute');
+                    router.push(lastVisitedRoute);
+                } else {
+                    router.push({ name: 'home' });
+                }
             }, 500);
         }
     } catch(error){
@@ -157,6 +163,7 @@ a:hover {
 p {
     font-size: 25px;
     margin-top: 20px;
+    color: white;
 }
 
 .image img {

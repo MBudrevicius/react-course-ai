@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { getTasksByLessonId, getBestSubmissionByProblemId } from '../api/lessonAPI';
+import { getTasksByLessonId, getBestSubmissionByProblemId } from '@/api/problemAPI';
 import SolutionEvaluation from './SolutionEvaluation.vue';
-import { getEvaluation } from '@/api/evaluationAPI';
+import { getEvaluation } from '@/api/AiAPI';
 import { useRoute } from 'vue-router'
 import SpinningLoader from './SpinningLoader.vue';
 import NotificationItem from './Notification.vue';
@@ -53,14 +53,9 @@ function closeScoreModal() {
 }
 
 async function sendFile(){
-    try{
-        const tasks = await getTasksByLessonId(lessonId.value);
-        const response = await getEvaluation(tasks[0].id, { codeSubmission: fileContent.value });
-        evaluationResult.value = response;
-    }
-    catch(error){
-        console.error(error);
-    }
+    const tasks = await getTasksByLessonId(lessonId.value);
+    const response = await getEvaluation(tasks[0].id, { codeSubmission: fileContent.value });
+    evaluationResult.value = response;
 }
 
 function readSubmission(event) {
@@ -145,6 +140,7 @@ input {
     margin-bottom: 20px;
     color: white;
     background-color: #4E4E4E;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 
 input[type=file]::file-selector-button {
@@ -154,7 +150,7 @@ input[type=file]::file-selector-button {
 button {
     border-radius: 25px;
     background-color:  #4E4E4E;
-    color: #916ad5;
+    color: white;
     padding: 5px;
     cursor: pointer;
     font-size: 20px;
@@ -162,5 +158,6 @@ button {
     align-self: right;
     padding-left: 15px;
     padding-right: 15px;
+    box-shadow: #000000 0px 0px 4px 0px;
 }
 </style>
