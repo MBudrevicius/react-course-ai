@@ -30,6 +30,7 @@ public class UserController(AppDbContext dbContext) : ControllerBase
         }
 
         user.Premium = true;
+        _dbContext.Users.Update(user);
         await _dbContext.SaveChangesAsync();
 
         Response.Cookies.Append("UserType", "premium", new CookieOptions
