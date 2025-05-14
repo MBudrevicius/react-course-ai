@@ -1,11 +1,8 @@
 
-using System.Security.Claims;
 using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models.Db;
-using Models.Request;
 using Serilog;
 
 [Route("api/problems")]
@@ -24,6 +21,7 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
             return Unauthorized(GetUserResult.Errors.First().Message);
 
         var lesson = await _dbContext.Lessons
+            .AsNoTracking()
             .Where(l => l.Id == lessonId)
             .FirstOrDefaultAsync();
 
@@ -40,6 +38,7 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
         }
 
         var problems = await _dbContext.Problems
+            .AsNoTracking()
             .Where(t => t.LessonId == lessonId)
             .ToListAsync();
 
@@ -56,6 +55,7 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
         }
 
         var bestSubmission = await _dbContext.Submissions
+            .AsNoTracking()
             .Where(s => s.UserId == GetUserResult.Value.Id && s.ProblemId == problemId)
             .FirstOrDefaultAsync();
         if (bestSubmission == null)
@@ -65,34 +65,5 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
         }
 
         return Ok(bestSubmission);
-    }
-
-    [HttpPost("{lessonId}")]
-    public async Task<IActionResult> AddProblem(int lessonId, [FromBody] ProblemRequest problem)
-    {
-        // Comment next 2 lines to enable problems adding
-        _logger.Error($"Adding problems is forbidden.");
-        return Forbid("Adding problemns is forbidden.");
-
-        var lesson = await _dbContext.Lessons.FindAsync(lessonId);
-        if (lesson == null)
-        {
-            _logger.Error($"Lesson not found with ID: '{lessonId}'.");
-            return NotFound("Lesson not found.");
-        }
-
-        var lastOrderIndex = await _dbContext.Problems
-            .Where(t => t.LessonId == lessonId)
-            .MaxAsync(t => (int?)t.OrderIndex) ?? 0;
-        var newProblem = new Problem
-        {
-            LessonId = lessonId,
-            OrderIndex = lastOrderIndex + 1,
-            Question = problem.Question
-        };
-
-        _dbContext.Problems.Add(newProblem);
-        await _dbContext.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetProblems), new { lessonId }, newProblem);
     }
 }

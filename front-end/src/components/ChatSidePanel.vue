@@ -1,5 +1,7 @@
 <script>
 import { sendAIMessage, sendAIAudio } from '@/api/AiAPI';
+import hljs from 'highlight.js';
+import { nextTick } from 'vue';
 
 export default {
   name: 'ChatSidePanel',
@@ -19,9 +21,32 @@ export default {
       mediaRecorder: null
     }
   },
+  mounted() {
+    nextTick(() => {
+      this.highlightCodeInMessages();
+    });
+  },
   methods: {
     togglePanel() {
       this.isCollapsed = !this.isCollapsed;
+    },
+
+    formatMessage(message) {
+      return message.replace(
+        /```(jsx|javascript|js|html|css)?\n?([\s\S]*?)```/g,
+        (_, language, code) => {
+          const lang = language || 'jsx'; 
+          return `<pre class="code-block"><code class="language-${lang}">${code}</code></pre>`;
+        }
+      );
+    },
+
+    highlightCodeInMessages() {
+      nextTick(() => {
+        document.querySelectorAll('.message pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      });
     },
 
     async handleSubmit() {
@@ -41,14 +66,22 @@ export default {
           message: `${contextInfo} \n ${userMessage}`,
           contextId: this.contextId
         });
-        this.messages.push({ role: 'assistant', content: response.reply });
+        const formattedReply = this.formatMessage(response.reply);
+        this.messages.push({ 
+          role: 'assistant', 
+          content: formattedReply,
+          formatted: true
+        });
+        
         if (response.contextId) {
           this.contextId = response.contextId;
         }
+        
+        this.highlightCodeInMessages();
       } catch (error) {
         this.messages.push({
           role: 'assistant',
-          content: 'Sorry, there was an error. Please try again.'
+          content: 'Atsiprašome, įvyko klaida. Bandykite dar kartą.'
         });
       }
     },
@@ -115,14 +148,11 @@ export default {
         </div>
 
         <div class="messages-container">
-          <div
-            v-for="(msg, index) in messages"
-            :key="index"
-            :class="['message', msg.role]"
-          >
-           {{ msg.content }}
-          </div>
-        </div>
+      <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.role]">
+        <div v-if="msg.formatted" v-html="msg.content"></div>
+        <div v-else>{{ msg.content }}</div>
+      </div>
+    </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
           <button type="button" class="mic-button" @click="startRecording" v-if="!isClicked" id="mic">
@@ -302,5 +332,33 @@ export default {
   margin-left: 8px;
   cursor: pointer;
   filter: invert(47%) sepia(72%) saturate(467%) hue-rotate(219deg) brightness(88%) contrast(89%);
+}
+</style>
+
+<style>
+.code-block {
+  background-color: #2d2d2d;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  margin: 8px 0;
+  border-left: 2px solid #916ad5;
+  white-space: pre;
+}
+
+.message.assistant code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+.message.assistant p {
+  margin: 8px 0;
+}
+
+.message.assistant a {
+  color: #e3d5ff;
+  text-decoration: underline;
 }
 </style>
