@@ -57,7 +57,6 @@ const options = {
     <div class="container">
         <h1>Tau puikiai sekėsi atlikti šias užduotis:</h1>
         <p>Įvadas į React</p>
-        <p>Props ir būsena</p>
     </div>
     <div class="container">
         <h1>Dar reikia pasistengti šiose temose:</h1>
