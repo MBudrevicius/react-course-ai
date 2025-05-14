@@ -1,6 +1,6 @@
 import { postRequestWithAuth } from './APIRequest';
 
-const AI_API_BASE_URL = 'http://localhost:5255/api/ai';
+const AI_API_BASE_URL = '/api/ai';
 
 export const sendAIMessage = async (data) =>
     await postRequestWithAuth(`${AI_API_BASE_URL}/chat`, data);
