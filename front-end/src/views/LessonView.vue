@@ -4,7 +4,8 @@ import SideBar from '../components/Sidebar.vue'
 import Task from '@/components/Task.vue';
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { getLessonById, getTasksByLessonId } from '../api/lessonAPI'
+import { getLessonById } from '@/api/lessonAPI'
+import { getTasksByLessonId } from '@/api/problemAPI'
 import ChatSidePanel from '@/components/ChatSidePanel.vue';
 import Tutorial from '@/components/Tutorial.vue';
 
@@ -119,7 +120,7 @@ async function fetchTasks() {
       <p v-else class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>   
     </div>
     <div class="chat">
-      <ChatSidePanel :lessonId="lessonId" :lessonTitle="lessonTitle" />
+      <ChatSidePanel :lessonTitle="lessonTitle" />
     </div>
   </div>  
   <Tutorial :isVisible="showTutorial" @close="closeTutorial" />

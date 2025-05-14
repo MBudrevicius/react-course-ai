@@ -19,15 +19,12 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
     private readonly AppDbContext _dbContext = dbContext;
     private readonly Serilog.ILogger _logger = Log.ForContext<AIController>();
 
-
     [HttpPost("evaluate/{problemId}")]
     public async Task<IActionResult> EvaluateCode(int problemId, [FromBody] EvaluateCodeRequest request)
     {
         var GetUserResult = await UserHelper.GetCurrentUserAsync(User, _dbContext, _logger);
         if (GetUserResult.IsFailed)
-        {
             return Unauthorized(GetUserResult.Errors.First().Message);
-        }
 
         var problem = await _dbContext.Problems
             .AsNoTracking()
@@ -50,15 +47,15 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         var response = await GetAiResponseAsync(_openAiModelName, systemMessages, prompt);
         if (string.IsNullOrWhiteSpace(response.Item1))
         {
-            _logger.Error("AI response for code evaluation was empty or null.");
+            _logger.Error("OpenAI response for code evaluation was empty or null.");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
-        _logger.Information($"AI response for code evaluation: '{response.Item1}'");
 
+        _logger.Information($"OpenAI response for code evaluation: '{response.Item1}'");
         var parseResult = ParseScoreAndFeedback(response.Item1);
         if (parseResult.IsFailed)
         {
-            _logger.Error($"AI response parsing failed: {parseResult.Errors.First().Message}");
+            _logger.Error($"OpenAI response parsing failed: {parseResult.Errors.First().Message}");
             return StatusCode(500, "Error while parsing OpenAI response. Try again later.");
         }
 
@@ -104,7 +101,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         string feedback = string.Join("\n", lines, 1, lines.Length - 1);
         return (score, feedback);
     }
-    
+
     [HttpPost("chat")]
     public async Task<IActionResult> ChatWithGPT([FromBody] ChatRequest request)
     {
@@ -112,6 +109,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
             .AsNoTracking()
             .Select(l => l.Title)
             .ToListAsync();
+
         string[] systemMessages =
         [
             "You are a React coding assistant for a person going through React course page.",
@@ -126,10 +124,10 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         var response = await GetAiResponseAsync("gpt-4o", systemMessages, request.Message, request.ContextId);
         if (string.IsNullOrWhiteSpace(response.Item1))
         {
-            _logger.Error($"AI didn't respond to user chat message. (Chat message: '{request.Message}')");
+            _logger.Error($"OpenAI didn't respond to user chat message. (Chat message: '{request.Message}')");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
-        _logger.Information($"AI response for chat message: '{response.Item1}'");
+        _logger.Information($"OpenAI response for chat message: '{response.Item1}'");
 
         return Ok(new { reply = response.Item1, contextId = response.Item2 });
     }
@@ -149,10 +147,10 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         var response = await audioClient.TranscribeAudioAsync(fileStream, request.Audio.FileName, audioOptions);
         if (string.IsNullOrWhiteSpace(response.Value.Text))
         {
-            _logger.Error("AI didn't respond to transcribe request.");
+            _logger.Error("OpenAI didn't respond to transcribe request.");
             return StatusCode(500, "Error while processing OpenAI response. Try again later.");
         }
-        _logger.Information($"AI response for audio transcription: '{response.Value.Text}'");
+        _logger.Information($"OpenAI response for audio transcription: '{response.Value.Text}'");
 
         return Ok(new { message = response.Value.Text });
     }
@@ -175,6 +173,7 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
         if (contextId != null)
         {
             var history = await _dbContext.ChatHistory
+                .AsNoTracking()
                 .Where(h => h.ContextId == contextId)
                 .OrderBy(h => h.OrderIndex)
                 .ToListAsync();

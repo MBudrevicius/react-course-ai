@@ -1,41 +1,29 @@
 import axios from 'axios';
+import { logAPIError, getCookie } from './APIRequest';
+
+const AUTH_API_BASE_URL = 'http://localhost:5255/api/auth';
+
+export function isUserLoggedIn() {
+    const cookieValue = getCookie('AuthToken');
+    return !!cookieValue;
+}
 
 export async function registerUser(data) {
     try {
-        const response = await axios.post('http://localhost:5255/api/auth/register', data, { withCredentials: true });
+        const response = await axios.post(`${AUTH_API_BASE_URL}/register`, data, { withCredentials: true });
         return response.data;
     } catch(error) {
-        if (error.response) {
-            console.log("Error status:", error.response.status);
-            console.log("Server response:", error.response.data);
-        } else {
-            console.log("Error:", error.message);
-        }
-    throw error;  
+        logAPIError(error);
+        throw error;  
     }
 }
 
 export async function loginUser(data) {
     try {
-        const response = await axios.post('http://localhost:5255/api/auth/login', data, { withCredentials: true });
+        const response = await axios.post(`${AUTH_API_BASE_URL}/login`, data, { withCredentials: true });
         return response.data;
     } catch(error) {
-        if (error.response) {
-            console.log("Error status:", error.response.status);
-            console.log("Server response:", error.response.data);
-        } else {
-            console.log("Error:", error.message);
-        }
+        logAPIError(error);
+        throw error;
     }
-}
-
-export function getCookie(name) {
-    let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? match[2] : null;
-}
-
-export function isUserLoggedIn() {
-    const cookieValue = getCookie('AuthToken');
-    if (!cookieValue) return false;
-    return true;
 }

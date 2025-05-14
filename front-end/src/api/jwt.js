@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+
 export function isTokenExpired(token) {
   try {
     const { exp } = jwtDecode(token);

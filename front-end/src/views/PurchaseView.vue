@@ -1,5 +1,17 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue';
+import { updatePremium } from '@/api/userAPI';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+async function updatePremiumAction() {
+    try {
+        await updatePremium();
+        router.push({ name: 'lessons' });
+    }
+    catch (error) {}
+}
 </script>
 <template>
     <Navbar />
@@ -15,7 +27,7 @@ import Navbar from '@/components/Navbar.vue';
                     <span class="line"></span>
                     <h2>Kompanionas</h2>
                     <p class="price">10€</p>
-                    <button class="purchase-button" @click="purchase">Pirkti</button>
+                    <button class="purchase-button" @click="updatePremiumAction">Pirkti</button>
                 </div>
             </div>
         </div>

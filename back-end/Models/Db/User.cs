@@ -16,4 +16,7 @@ public class User
 
     [Required]
     public required string PasswordHash { get; set; }
+
+    [Required]
+    public bool Premium { get; set; } = false;
 }
