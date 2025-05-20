@@ -8,6 +8,24 @@ import { getSolutions } from '@/api/userAPI';
 const loading = ref(true);
 const series = ref([0, 0]);
 const options = ref({
+  tooltip: {
+    enabled: false
+  },
+  states: {
+    hover: {
+      filter: {
+        type: 'none'
+      }
+    },
+    active: {
+      filter: {
+        type: 'none'
+      }
+    }
+  },
+  stroke: {
+    width: 0
+  },
   legend: {
     show: false
   },
@@ -47,7 +65,7 @@ onMounted(async () => {
     const scores = data.map(item => item.score);
     const totalLessons = scores.length;
     const completedLessons = data.filter(item => item.score >= 50);
-    const percentComplete = Math.round((completedLessons.length / totalLessons) * 100);
+    const percentComplete = (completedLessons.length / totalLessons) * 100;
 
     series.value = [percentComplete, 100 - percentComplete];
 
@@ -67,22 +85,25 @@ onMounted(async () => {
 <template>
   <Navbar />
   <SpinningLoader v-if="loading" />
-  <div class="container">
-    <h1>Pažangumas</h1>
-    <p>Įvykdei {{ series[0] }}% užduočių</p>
-    <VueApexCharts width="300" type="donut" :options="options" :series="series" />
-    <p>Vidurkis: {{ averageScore }}</p>
-
+  <div style=" display: flex; align-items: center; justify-content: center; flex-direction: column;">
     <div class="container">
-      <h1>Tau puikiai sekėsi atlikti šias užduotis:</h1>
-      <p v-if="successfulLessons.length === 0">Nėra užduočių su pažanga.</p>
-      <p v-for="lesson in successfulLessons" :key="lesson">{{ lesson }}</p>
-    </div>
+      <h1>Pažangumas</h1>
+      <p>Įvykdei {{ series[0] }}% užduočių</p>
+      <VueApexCharts width="300" type="donut" :options="options" :series="series" />
+      <p>Vidurkis: {{ averageScore }}%</p>
+      <div style="display: flex; align-items: center; justify-content: center; flex-direction: row;">
+        <div class="container">
+          <h1>Tau puikiai sekėsi atlikti šias užduotis:</h1>
+          <p v-if="successfulLessons.length === 0">Nėra užduočių su pažanga.</p>
+          <p v-for="lesson in successfulLessons" :key="lesson">{{ lesson }}</p>
+        </div>
 
-    <div class="container">
-      <h1>Dar reikia pasistengti šiose temose:</h1>
-      <p v-if="lessonsNeedingImprovement.length === 0">Nėra neišspręstų užduočių.</p>
-      <p v-for="lesson in lessonsNeedingImprovement" :key="lesson">{{ lesson }}</p>
+        <div class="container">
+          <h1>Dar reikia pasistengti šiose temose:</h1>
+          <p v-if="lessonsNeedingImprovement.length === 0">Nėra neišspręstų užduočių.</p>
+          <p v-for="lesson in lessonsNeedingImprovement" :key="lesson">{{ lesson }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
