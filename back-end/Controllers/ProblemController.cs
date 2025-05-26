@@ -1,11 +1,8 @@
 
-using System.Security.Claims;
 using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models.Db;
-using Models.Request;
 using Serilog;
 
 [Route("api/problems")]
@@ -19,35 +16,33 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
     [HttpGet("{lessonId}")]
     public async Task<IActionResult> GetProblems(int lessonId)
     {
-        var problems = await _dbContext.Problems
-            .Where(t => t.LessonId == lessonId)
-            .ToListAsync();
-        return Ok(problems);
-    }
+        var GetUserResult = await UserHelper.GetCurrentUserAsync(User, _dbContext, _logger);
+        if (GetUserResult.IsFailed)
+            return Unauthorized(GetUserResult.Errors.First().Message);
 
-    [HttpPost("{lessonId}")]
-    public async Task<IActionResult> AddProblem(int lessonId, [FromBody] ProblemRequest problem)
-    {
-        var lesson = await _dbContext.Lessons.FindAsync(lessonId);
-        if (lesson == null)
+        var lesson = await _dbContext.Lessons
+            .AsNoTracking()
+            .Where(l => l.Id == lessonId)
+            .FirstOrDefaultAsync();
+
+        if(lesson == null)
         {
             _logger.Error($"Lesson not found with ID: '{lessonId}'.");
-            return NotFound("Lesson not found.");
+            return NotFound();
         }
 
-        var lastOrderIndex = await _dbContext.Problems
-            .Where(t => t.LessonId == lessonId)
-            .MaxAsync(t => (int?)t.OrderIndex) ?? 0;
-        var newProblem = new Problem
+        if(lesson.Premium && !GetUserResult.Value.Premium)
         {
-            LessonId = lessonId,
-            OrderIndex = lastOrderIndex + 1,
-            Question = problem.Question
-        };
+            _logger.Error($"Non premium user with ID: '{GetUserResult.Value.Id}' tried to access premium lesson: '{lesson.Title}'.");
+            return Forbid("This lesson is only available for premium users.");
+        }
 
-        _dbContext.Problems.Add(newProblem);
-        await _dbContext.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetProblems), new { lessonId }, newProblem);
+        var problems = await _dbContext.Problems
+            .AsNoTracking()
+            .Where(t => t.LessonId == lessonId)
+            .ToListAsync();
+
+        return Ok(problems);
     }
 
     [HttpGet("bestSubmission/{problemId}")]
@@ -60,6 +55,7 @@ public class ProblemController(AppDbContext dbContext) : ControllerBase
         }
 
         var bestSubmission = await _dbContext.Submissions
+            .AsNoTracking()
             .Where(s => s.UserId == GetUserResult.Value.Id && s.ProblemId == problemId)
             .FirstOrDefaultAsync();
         if (bestSubmission == null)

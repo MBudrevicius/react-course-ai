@@ -2,8 +2,6 @@ using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models.Db;
-using Models.Request;
 using Serilog;
 
 [Route("api/lessons")]
@@ -18,8 +16,9 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
     public async Task<IActionResult> GetTitles()
     {
         var lessonTitles = await _dbContext.Lessons
+            .AsNoTracking()
             .OrderBy(l => l.OrderIndex)
-            .Select(l => new { l.Id, l.Title })
+            .Select(l => new { l.Id, l.Title, l.Premium })
             .ToListAsync();
         return Ok(lessonTitles);
     }
@@ -27,32 +26,27 @@ public class LessonController(AppDbContext dbContext) : ControllerBase
     [HttpGet("{lessonId}")]
     public async Task<IActionResult> GetLesson(int lessonId)
     {
+        var GetUserResult = await UserHelper.GetCurrentUserAsync(User, _dbContext, _logger);
+        if (GetUserResult.IsFailed)
+            return Unauthorized(GetUserResult.Errors.First().Message);
+
         var lesson = await _dbContext.Lessons
+            .AsNoTracking()
             .Where(l => l.Id == lessonId)
             .FirstOrDefaultAsync();
 
-        if (lesson == null)
+        if(lesson == null)
         {
             _logger.Error($"Lesson not found with ID: '{lessonId}'.");
             return NotFound();
         }
 
-        return Ok(lesson);
-    }
-
-    [HttpPost("add")]
-    public async Task<IActionResult> AddLesson([FromBody] LessonRequest lesson)
-    {
-        int lastOrderIndex = await _dbContext.Lessons.MaxAsync(l => (int?)l.OrderIndex) ?? 0;
-        var newLesson = new Lesson
+        if(lesson.Premium && !GetUserResult.Value.Premium)
         {
-            Title = lesson.Title,
-            Content = lesson.Content,
-            OrderIndex = lastOrderIndex + 1
-        };
+            _logger.Error($"Non premium user with ID: '{GetUserResult.Value.Id}' tried to access premium lesson: '{lesson.Title}'.");
+            return Forbid("This lesson is only available for premium users.");
+        }
 
-        _dbContext.Lessons.Add(newLesson);
-        await _dbContext.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetLesson), new { lessonId = newLesson.Id }, newLesson);
+        return Ok(lesson);
     }
 }

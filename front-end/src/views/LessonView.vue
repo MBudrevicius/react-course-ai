@@ -4,9 +4,11 @@ import SideBar from '../components/Sidebar.vue'
 import Task from '@/components/Task.vue';
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { getLessonById, getTasksByLessonId } from '../api/lessonAPI'
+import { getLessonById } from '@/api/lessonAPI'
+import { getTasksByLessonId } from '@/api/problemAPI'
 import ChatSidePanel from '@/components/ChatSidePanel.vue';
 import Tutorial from '@/components/Tutorial.vue';
+import NotificationItem from '@/components/Notification.vue';
 
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css';
@@ -19,6 +21,7 @@ const lessonContent = ref('')
 const taskContent = ref('No tasks available')
 const showTutorial = ref(false);
 const sidebarOpen = ref(true);
+const showNotification = ref(false);
 
 watch(() => route.params.id, async (newId) => {
   lessonId.value = newId;
@@ -94,17 +97,23 @@ async function fetchTasks() {
     taskContent.value = 'Error fetching tasks';
   }
 }
+
+const onPremiumRequired = () => {
+  showNotification.value = true;
+   console.log("Premium required for this lesson");
+}
 </script>
 
 <template>
   <Navbar />
+  <NotificationItem v-if="showNotification" @close="showNotification = false" :errorMessage="'Šis pamoka yra prieinama tik apmokėjusiems vartotojams.'" :isSuccess="FontFaceSetLoadEvent"/>
   <div v-if="!sidebarOpen" class="sidebar-toggle closed" @click="toggleSidebar">
     <img src="/svg/arrow-right.svg" alt="Open menu" class="toggle-icon" />
   </div>
   
   <div class="grid-container" :class="{ 'sidebar-collapsed': !sidebarOpen }">
     <div class="sidebar" :class="{ 'hidden': !sidebarOpen }">
-      <SideBar />
+      <SideBar @premiumRequired="onPremiumRequired"/>
     </div>
     
     <div v-if="sidebarOpen" class="sidebar-toggle open" @click="toggleSidebar">
@@ -119,7 +128,7 @@ async function fetchTasks() {
       <p v-else class="theory">Jei nori pradėti mokytis, pasirink pamoką iš šoninės juostos.</p>   
     </div>
     <div class="chat">
-      <ChatSidePanel :lessonId="lessonId" :lessonTitle="lessonTitle" />
+      <ChatSidePanel :lessonTitle="lessonTitle" />
     </div>
   </div>  
   <Tutorial :isVisible="showTutorial" @close="closeTutorial" />

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({
     errorMessage: String,
@@ -81,8 +81,8 @@ onMounted(() => {
     top: 20px;
     right: 10px;
 }
+
 .close:hover{
     color: #2D2D2D;
 }
-
 </style>
