@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { getTasksByLessonId, getBestSubmissionByProblemId } from '@/api/problemAPI';
 import SolutionEvaluation from './SolutionEvaluation.vue';
 import { getEvaluation } from '@/api/AiAPI';
@@ -19,6 +19,8 @@ const showNotification = ref(false);
 const isSuccessCheck = ref(false);
 const route = useRoute();
 const lessonId = ref(route.params.id);
+
+const isFileSelected = computed(() => fileContent.value.trim() !== '');
 
 watch(() => route.params.id, async () => {
     lessonId.value = route.params.id;
@@ -69,6 +71,7 @@ function readSubmission(event) {
         if(fileInput.value){
             fileInput.value.value = null;
         }
+        fileContent.value = '';
         return;
     }
 
@@ -112,7 +115,14 @@ async function clearInput(){
             @change="readSubmission" 
             ref="fileInput" 
         />
-        <button type="submit" @click="toggleScoreModal('submit')">Pateikti</button>
+        <button 
+          type="submit" 
+          @click="toggleScoreModal('submit')" 
+          :disabled="!isFileSelected"
+          class="submit-button"
+        >
+          Pateikti
+        </button>
         <button v-if="hasSubmission" @click="toggleScoreModal('best-solution')">
             Geriausias sprendimas
         </button>
@@ -159,5 +169,12 @@ button {
     padding-left: 15px;
     padding-right: 15px;
     box-shadow: #000000 0px 0px 4px 0px;
+    transition: background-color 0.3s ease;
+}
+
+button:disabled,
+button[disabled] {
+    background-color: #333333;
+    cursor: not-allowed;
 }
 </style>
