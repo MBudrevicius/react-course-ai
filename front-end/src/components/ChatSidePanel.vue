@@ -18,7 +18,8 @@ export default {
       messages: [],
       contextId: null,
       isClicked: false,
-      mediaRecorder: null
+      mediaRecorder: null,
+      isTyping: false,
     }
   },
   mounted() {
@@ -61,24 +62,30 @@ export default {
         if (this.lessonTitle) {
           contextInfo = `[Context: Naudotojas šiuo metu atsidaręs React pamoką skaito pamoką (atsižvelk į tai): "${this.lessonTitle}"]`;
         }
-        
+
+        this.isTyping = true;
+
         const response = await sendAIMessage({
           message: `${contextInfo} \n ${userMessage}`,
           contextId: this.contextId
         });
+
+        this.isTyping = false;
+
         const formattedReply = this.formatMessage(response.reply);
         this.messages.push({ 
           role: 'assistant', 
           content: formattedReply,
           formatted: true
         });
-        
+
         if (response.contextId) {
           this.contextId = response.contextId;
         }
-        
+
         this.highlightCodeInMessages();
       } catch (error) {
+        this.isTyping = false;
         this.messages.push({
           role: 'assistant',
           content: 'Atsiprašome, įvyko klaida. Bandykite dar kartą.'
@@ -148,11 +155,17 @@ export default {
         </div>
 
         <div class="messages-container">
-      <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.role]">
-        <div v-if="msg.formatted" v-html="msg.content"></div>
-        <div v-else>{{ msg.content }}</div>
-      </div>
-    </div>
+          <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.role]">
+            <div v-if="msg.formatted" v-html="msg.content"></div>
+            <div v-else>{{ msg.content }}</div>
+          </div>
+
+          <div v-if="isTyping" class="message-assistant-typing">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
 
         <form @submit.prevent="handleSubmit" class="chat-form">
           <button type="button" class="mic-button" @click="startRecording" v-if="!isClicked" id="mic">
@@ -167,13 +180,14 @@ export default {
             class="chat-input"
             placeholder="Reikia pagalbos?"
           />
-          <button type="submit" class="send-button"><img src="/svg/send.svg" class="svg"/></button>
+          <button type="submit" class="send-button">
+            <img src="/svg/send.svg" class="svg"/>
+          </button>
         </form>
       </div>
     </transition>
   </div>
 </template>
-
 
 <style scoped>
 .mic-button {
@@ -195,21 +209,21 @@ export default {
 }
 
 .img-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 100%; 
-    overflow: hidden; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+  width: 40px;
+  height: 40px;
+  border-radius: 100%; 
+  overflow: hidden; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
 }
 
 .img-circle img {
-    width: auto;
-    height: 90px; 
-    margin-top: 35px;
-    object-fit: cover; 
-    background-color: white;
+  width: auto;
+  height: 90px; 
+  margin-top: 35px;
+  object-fit: cover; 
+  background-color: white;
 }
 
 .svg {
@@ -284,7 +298,7 @@ export default {
   padding: 16px;
   background-color: #4E4E4E;
   height: 40vh;
-  box-shadow:rgba(0, 0, 0, 0.15) 0px 1px 3px 0px inset;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 3px 0px inset;
 }
 
 .message {
@@ -312,6 +326,49 @@ export default {
   border-top-right-radius: 15px;
   border-bottom-right-radius: 15px;
   margin-right: 20px;
+}
+
+.message-assistant-typing {
+  background-color: transparent;
+  padding: 0;
+  margin-right: 20px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.message-assistant-typing .dot {
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  background-color: #916ad5;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.message-assistant-typing .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.message-assistant-typing .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.message-assistant-typing .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% {
+    opacity: 0.4;
+  }
+  40% {
+    opacity: 1;
+  }
 }
 
 .chat-form {

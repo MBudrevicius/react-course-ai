@@ -5,6 +5,7 @@ import { getCookie } from '@/api/APIRequest';
 
 const lessons = ref([]);
 const isPremiumUser = ref(false);
+const emit = defineEmits(['premiumRequired']);
 
 onMounted(async () => {
   isPremiumUser.value = getCookie('UserType') === 'premium';
@@ -14,6 +15,7 @@ onMounted(async () => {
     lessons.value = data || [];
   } catch (error) {}
 })
+
 </script>
 
 <template>
@@ -25,13 +27,20 @@ onMounted(async () => {
       <ul>
         <li v-for="(lesson, index) in lessons" :key="lesson.id">
           <router-link
+            v-if="!lesson.premium || isPremiumUser"
             :to="`/lessons/${lesson.id}`"
             class="lesson-link"
-            :class="{ disabled: lesson.premium && !isPremiumUser }"
-            @click.prevent="lesson.premium && !isPremiumUser ? null : undefined"
           >
             {{ index + 1 }}. {{ lesson.title }}
           </router-link>
+          <a
+            v-else
+            class="lesson-link"
+            :class="{ disabled: lesson.premium && !isPremiumUser }"
+            @click = "emit('premiumRequired')"
+          >
+            {{ index + 1 }}. {{ lesson.title }}
+        </a>
         </li>
       </ul>
     </div>
@@ -98,7 +107,7 @@ a {
 
 .lesson-link.disabled {
   color: grey;
-  pointer-events: none;
-  cursor: not-allowed;
+  cursor: pointer;
 }
+
 </style>

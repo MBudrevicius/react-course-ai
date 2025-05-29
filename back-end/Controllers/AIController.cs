@@ -37,8 +37,8 @@ public class AIController(IConfiguration config, AppDbContext dbContext) : Contr
 
         string[] systemMessages =
         [
+            "From now on your response format IS REQUIRED TO BE: \"{score (just a number)} {newline} {feedback}\"",
             "You are a React code evaluator. You will be given a task and a user's code submission. Evaluate the code and provide score and feedback. Score has to be between 0-100. When evaluating check if code is valid React code, compilable and provide feedback on the code quality, correctness, and any improvements that can be made.",
-            "Evaluation message format has to be: \"{score} {newline} {feedback}\"",
             "Your response has to be in Lithuanian language.",
             $"The React task that the code will have to solve is (it's in Lithuanian language): \"{problem.Question}\"",
         ];

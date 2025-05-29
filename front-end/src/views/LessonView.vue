@@ -8,6 +8,7 @@ import { getLessonById } from '@/api/lessonAPI'
 import { getTasksByLessonId } from '@/api/problemAPI'
 import ChatSidePanel from '@/components/ChatSidePanel.vue';
 import Tutorial from '@/components/Tutorial.vue';
+import NotificationItem from '@/components/Notification.vue';
 
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css';
@@ -20,6 +21,7 @@ const lessonContent = ref('')
 const taskContent = ref('No tasks available')
 const showTutorial = ref(false);
 const sidebarOpen = ref(true);
+const showNotification = ref(false);
 
 watch(() => route.params.id, async (newId) => {
   lessonId.value = newId;
@@ -49,7 +51,7 @@ const handleResize = () => {
   if (window.innerWidth > 960) {
     sidebarOpen.value = true;
   } 
-  else if (window.innerWidth <= 768) {
+  else if (window.innerWidth <= 960) {
     sidebarOpen.value = false;
   }
 };
@@ -95,17 +97,23 @@ async function fetchTasks() {
     taskContent.value = 'Error fetching tasks';
   }
 }
+
+const onPremiumRequired = () => {
+  showNotification.value = true;
+   console.log("Premium required for this lesson");
+}
 </script>
 
 <template>
   <Navbar />
+  <NotificationItem v-if="showNotification" @close="showNotification = false" :errorMessage="'Šis pamoka yra prieinama tik apmokėjusiems vartotojams.'" :isSuccess="FontFaceSetLoadEvent"/>
   <div v-if="!sidebarOpen" class="sidebar-toggle closed" @click="toggleSidebar">
     <img src="/svg/arrow-right.svg" alt="Open menu" class="toggle-icon" />
   </div>
   
   <div class="grid-container" :class="{ 'sidebar-collapsed': !sidebarOpen }">
     <div class="sidebar" :class="{ 'hidden': !sidebarOpen }">
-      <SideBar />
+      <SideBar @premiumRequired="onPremiumRequired"/>
     </div>
     
     <div v-if="sidebarOpen" class="sidebar-toggle open" @click="toggleSidebar">
